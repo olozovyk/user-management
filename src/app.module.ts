@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getPostgresConfig } from './configs/postgres.config';
+import { AuthModule } from './auth/auth.module';
+import { postgresConfig } from './configs/postgres.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: getPostgresConfig,
-    }),
+    TypeOrmModule.forRoot(postgresConfig),
+    AuthModule,
   ],
   controllers: [],
   providers: [],
