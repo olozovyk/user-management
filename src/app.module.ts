@@ -7,7 +7,7 @@ import { postgresConfig } from './configs/postgres.config';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot(postgresConfig),
+    TypeOrmModule.forRoot({ ...postgresConfig, autoLoadEntities: true }),
     AuthModule,
   ],
   controllers: [],

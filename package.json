@@ -21,8 +21,8 @@
     "lint:prepare": "npm run format && npm run lint",
     "prepare": "husky install",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:create": "npm run typeorm migration:create src/migrations/auto",
-    "migration:generate": "npm run typeorm migration:generate src/migrations/auto -- -d src/configs/postgres.dataSource.ts -p",
+    "migration:create": "npm run typeorm migration:create src/migrations/AUTO_NAME",
+    "migration:generate": "npm run typeorm migration:generate src/migrations/AUTO_NAME -- -d src/configs/postgres.dataSource.ts -p",
     "migration:run": "npm run typeorm migration:run -- -d src/configs/postgres.dataSource.ts",
     "migration:revert": "npm run typeorm migration:revert -- -d src/configs/postgres.dataSource.ts",
     "migration:show": "npm run typeorm migration:show -- -d src/configs/postgres.dataSource.ts"
@@ -31,6 +31,7 @@
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.2",
     "@nestjs/core": "^9.0.0",
+    "@nestjs/jwt": "^10.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
     "class-transformer": "^0.5.1",
