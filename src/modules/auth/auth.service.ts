@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 @Injectable()
 export class AuthService {
+  private logger = new Logger(AuthService.name);
+
   constructor(
     private authRepository: AuthRepository,
     private jwtService: JwtService,
@@ -38,6 +40,16 @@ export class AuthService {
     return this.authRepository.saveToken(token, userId);
   }
 
+  async decodeToken(token: string) {
+    const secret = this.configService.get('JWT_REFRESH_SECRET');
+
+    try {
+      return await this.jwtService.decode(token, secret);
+    } catch (e) {
+      this.logger.error('Token is not valid');
+    }
+  }
+
   createHash(password: string) {
     const algorithm = this.configService.get('HASH_ALGORITHM');
     const localSalt = this.configService.get('LOCAL_SALT');
@@ -55,5 +67,9 @@ export class AuthService {
       .pbkdf2Sync(password, salt, iterations, keylen, algorithm)
       .toString('hex');
     return hashToPassword + remoteSalt;
+  }
+
+  deleteToken(token: string) {
+    return this.authRepository.deleteToken(token);
   }
 }

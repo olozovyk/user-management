@@ -6,13 +6,15 @@ import {
   HttpStatus,
   Logger,
   Post,
+  Req,
   Res,
 } from '@nestjs/common';
 import { CreateUserDto } from '../../dto/createUser.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from '../../dto/login.dto';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +23,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
   @Post('signup')
@@ -84,7 +87,7 @@ export class AuthController {
       existingUser.nickname,
     );
 
-    res.cookie('token', refreshToken);
+    res.cookie('token', refreshToken, { httpOnly: true });
     await this.authService.saveToken(refreshToken, existingUser.id);
 
     res.json({
@@ -94,6 +97,50 @@ export class AuthController {
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
       },
+      token: accessToken,
+    });
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@Req() req: Request) {
+    await this.authService.deleteToken(req.cookies.token);
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Req() req: Request, @Res() res: Response) {
+    const oldToken = req.cookies.token;
+
+    if (!oldToken) {
+      throw new HttpException('Token is not provided', HttpStatus.BAD_REQUEST);
+    }
+
+    const payload = (await this.authService.decodeToken(oldToken)) as {
+      id: number;
+      nickname: string;
+    };
+
+    if (!payload || !payload.id || !payload.nickname) {
+      throw new HttpException('Token is not valid', HttpStatus.UNAUTHORIZED);
+    }
+
+    const { accessToken, refreshToken } = await this.authService.createTokens(
+      payload.id,
+      payload.nickname,
+    );
+
+    const existingUser = await this.usersService.getUserById(payload.id);
+
+    if (!existingUser) {
+      throw new HttpException('User is not found', HttpStatus.NOT_FOUND);
+    }
+
+    res.cookie('token', refreshToken, { httpOnly: true });
+    await this.authService.saveToken(refreshToken, existingUser.id);
+
+    res.json({
+      statusCode: HttpStatus.OK,
       token: accessToken,
     });
   }

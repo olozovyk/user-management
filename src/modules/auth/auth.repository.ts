@@ -33,4 +33,8 @@ export class AuthRepository {
 
     return this.tokenRepository.save({ token, user });
   }
+
+  deleteToken(token: string) {
+    return this.tokenRepository.delete({ token });
+  }
 }

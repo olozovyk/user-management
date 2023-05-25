@@ -13,4 +13,8 @@ export class UsersService {
   getUserByNickname(nickname: string) {
     return this.userRepository.getUserByNickname(nickname);
   }
+
+  getUserById(id: number) {
+    return this.userRepository.getUserById(id);
+  }
 }
