@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { CreateUserDto } from './dto/createUser.dto';
+import { CreateUserDto } from '../../dto/createUser.dto';
 
 @Injectable()
-export class AuthRepository {
+export class UsersRepository {
   constructor(private dataSource: DataSource) {}
 
   private userRepository = this.dataSource.getRepository('User');
@@ -12,7 +12,11 @@ export class AuthRepository {
     return this.userRepository.save(user);
   }
 
-  getAllUsers() {
-    return this.userRepository.find();
+  getUserByNickname(nickname: string) {
+    return this.userRepository.findOneBy({ nickname });
+  }
+
+  getUserById(id: number) {
+    return this.userRepository.findOneBy({ id });
   }
 }
