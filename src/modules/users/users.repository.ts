@@ -8,6 +8,10 @@ export class UsersRepository {
 
   private userRepository = this.dataSource.getRepository('User');
 
+  getUsers(limit: number, skip: number) {
+    return this.userRepository.find({ take: limit, skip });
+  }
+
   createUser(user: CreateUserDto) {
     return this.userRepository.save(user);
   }

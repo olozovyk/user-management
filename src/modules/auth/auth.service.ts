@@ -1,8 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { AuthRepository } from './auth.repository';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
+
+import { AuthRepository } from './auth.repository';
 
 @Injectable()
 export class AuthService {

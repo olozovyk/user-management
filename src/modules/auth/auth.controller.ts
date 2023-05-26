@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import {
   Body,
   Controller,
@@ -9,12 +10,12 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
 import { CreateUserDto } from '../../dto/createUser.dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from '../../dto/login.dto';
-import { Request, Response } from 'express';
-import { JwtService } from '@nestjs/jwt';
 
 @Controller('auth')
 export class AuthController {
@@ -49,7 +50,7 @@ export class AuthController {
     const newUser = await this.usersService.createUser(user);
 
     return {
-      statusCode: 201,
+      statusCode: HttpStatus.CREATED,
       user: {
         id: newUser.id,
         nickname: newUser.nickname,
@@ -91,7 +92,7 @@ export class AuthController {
     await this.authService.saveToken(refreshToken, existingUser.id);
 
     res.json({
-      statusCode: 200,
+      statusCode: HttpStatus.OK,
       user: {
         nickname: existingUser.nickname,
         firstName: existingUser.firstName,

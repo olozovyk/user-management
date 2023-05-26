@@ -6,6 +6,11 @@ import { CreateUserDto } from '../../dto/createUser.dto';
 export class UsersService {
   constructor(private userRepository: UsersRepository) {}
 
+  getUsers(limit: number, page: number) {
+    const skip = (page - 1) * limit;
+    return this.userRepository.getUsers(limit, skip);
+  }
+
   createUser(user: CreateUserDto) {
     return this.userRepository.createUser(user);
   }
