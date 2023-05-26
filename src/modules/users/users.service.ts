@@ -17,4 +17,8 @@ export class UsersService {
   getUserById(id: number) {
     return this.userRepository.getUserById(id);
   }
+
+  editUser(id: number, user: Omit<Partial<CreateUserDto>, 'nickname'>) {
+    return this.userRepository.editUser(id, user);
+  }
 }

@@ -19,4 +19,8 @@ export class UsersRepository {
   getUserById(id: number) {
     return this.userRepository.findOneBy({ id });
   }
+
+  editUser(id: number, user: Omit<Partial<CreateUserDto>, 'nickname'>) {
+    return this.userRepository.update({ id }, { ...user });
+  }
 }

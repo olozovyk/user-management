@@ -44,7 +44,8 @@ export class AuthService {
     const secret = this.configService.get('JWT_REFRESH_SECRET');
 
     try {
-      return await this.jwtService.decode(token, secret);
+      await this.jwtService.verifyAsync(token, { secret });
+      return this.jwtService.decode(token);
     } catch (e) {
       this.logger.error('Token is not valid');
     }
