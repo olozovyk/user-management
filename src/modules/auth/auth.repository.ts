@@ -1,6 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { UsersRepository } from '../users/users.repository';
+import { User } from 'src/entities/user.entity';
+import { Token } from 'src/entities/token.entity';
 
 @Injectable()
 export class AuthRepository {
@@ -11,11 +13,11 @@ export class AuthRepository {
 
   private tokenRepository = this.dataSource.getRepository('Token');
 
-  async getTokenByUser(user) {
-    return this.tokenRepository.findOneBy({ user });
+  public async getTokenByUser(user: User): Promise<Token> {
+    return this.tokenRepository.findOneBy({ user }) as Promise<Token>;
   }
 
-  async saveToken(token: string, userId: number) {
+  public async saveToken(token: string, userId: number): Promise<void> {
     const user = await this.usersRepository.getUserById(userId);
 
     if (!user) {
@@ -28,13 +30,13 @@ export class AuthRepository {
     const existingToken = await this.getTokenByUser(user);
 
     if (existingToken) {
-      return this.tokenRepository.update({ user }, { token });
+      this.tokenRepository.update({ user }, { token });
     }
 
-    return this.tokenRepository.save({ token, user });
+    this.tokenRepository.save({ token, user });
   }
 
-  deleteToken(token: string) {
-    return this.tokenRepository.delete({ token });
+  public deleteToken(token: string): void {
+    this.tokenRepository.delete({ token });
   }
 }

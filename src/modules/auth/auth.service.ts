@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
+import { ITokenPayload, ITokens } from 'src/types';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async createTokens(id: number, nickname: string) {
+  public async createTokens(id: number, nickname: string): Promise<ITokens> {
     const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
     const accessTtl = this.configService.get('JWT_ACCESS_TTL');
     const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
@@ -37,22 +38,22 @@ export class AuthService {
     };
   }
 
-  saveToken(token: string, userId: number) {
-    return this.authRepository.saveToken(token, userId);
+  public saveToken(token: string, userId: number): void {
+    this.authRepository.saveToken(token, userId);
   }
 
-  async decodeToken(token: string) {
+  public async decodeToken(token: string): Promise<ITokenPayload> {
     const secret = this.configService.get('JWT_REFRESH_SECRET');
 
     try {
       await this.jwtService.verifyAsync(token, { secret });
-      return this.jwtService.decode(token);
+      return this.jwtService.decode(token) as ITokenPayload;
     } catch (e) {
       this.logger.error('Token is not valid');
     }
   }
 
-  createHash(password: string) {
+  public createHash(password: string): string {
     const algorithm = this.configService.get('HASH_ALGORITHM');
     const localSalt = this.configService.get('LOCAL_SALT');
     const iterations = Number(this.configService.get('ITERATIONS'));
@@ -71,7 +72,7 @@ export class AuthService {
     return hashToPassword + remoteSalt;
   }
 
-  deleteToken(token: string) {
-    return this.authRepository.deleteToken(token);
+  public deleteToken(token: string): void {
+    this.authRepository.deleteToken(token);
   }
 }
