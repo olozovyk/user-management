@@ -11,10 +11,9 @@ import {
   Res,
 } from '@nestjs/common';
 
-import { CreateUserDto } from '../../dto/createUser.dto';
+import { CreateUserDto, LoginDto } from '../../dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from '../../dto/login.dto';
 import { User } from 'src/entities/user.entity';
 
 @Controller('auth')

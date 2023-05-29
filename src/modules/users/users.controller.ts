@@ -15,6 +15,7 @@ import { UsersService } from './users.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { IUser } from 'src/types';
 import { User } from 'src/entities/user.entity';
+import { QueryPaginationDto } from 'src/dto';
 
 @Controller('users')
 export class UsersController {
@@ -24,9 +25,9 @@ export class UsersController {
   ) {}
 
   @Get()
-  public async getUsers(@Query() query: { limit: string; page: string }) {
-    const limit = Number(query.limit) || 20;
-    const page = Number(query.page) || 1;
+  public async getUsers(@Query() query: QueryPaginationDto) {
+    const limit = query.limit || 20;
+    const page = query.page || 1;
 
     const users = (await this.userService.getUsers(limit, page)) as User[];
 
