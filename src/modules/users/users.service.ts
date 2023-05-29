@@ -22,12 +22,12 @@ export class UsersService {
     return this.userRepository.getUserByNickname(nickname);
   }
 
-  public getUserById(id: number): Promise<User> {
+  public getUserById(id: string): Promise<User> {
     return this.userRepository.getUserById(id);
   }
 
   public editUser(
-    id: number,
+    id: string,
     user: Omit<Partial<CreateUserDto>, 'nickname'>,
   ): Promise<UpdateResult> {
     return this.userRepository.editUser(id, user);

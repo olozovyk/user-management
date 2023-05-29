@@ -49,7 +49,7 @@ export class UsersController {
     @Param() params: { id: string },
     @Body() body: Partial<CreateUserDto>,
   ) {
-    const id = Number(params.id);
+    const id = params.id;
     const { nickname, firstName, lastName, password } = body;
 
     if (nickname) {

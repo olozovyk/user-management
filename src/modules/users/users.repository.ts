@@ -22,12 +22,12 @@ export class UsersRepository {
     return this.userRepository.findOneBy({ nickname }) as Promise<User>;
   }
 
-  public getUserById(id: number): Promise<User> {
+  public getUserById(id: string): Promise<User> {
     return this.userRepository.findOneBy({ id }) as Promise<User>;
   }
 
   public editUser(
-    id: number,
+    id: string,
     user: Omit<Partial<CreateUserDto>, 'nickname'>,
   ): Promise<UpdateResult> {
     return this.userRepository.update({ id }, { ...user });

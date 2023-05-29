@@ -17,7 +17,7 @@ export class AuthRepository {
     return this.tokenRepository.findOneBy({ user }) as Promise<Token>;
   }
 
-  public async saveToken(token: string, userId: number): Promise<void> {
+  public async saveToken(token: string, userId: string): Promise<void> {
     const user = await this.usersRepository.getUserById(userId);
 
     if (!user) {

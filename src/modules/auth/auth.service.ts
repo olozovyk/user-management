@@ -16,7 +16,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  public async createTokens(id: number, nickname: string): Promise<ITokens> {
+  public async createTokens(id: string, nickname: string): Promise<ITokens> {
     const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
     const accessTtl = this.configService.get('JWT_ACCESS_TTL');
     const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
@@ -38,7 +38,7 @@ export class AuthService {
     };
   }
 
-  public saveToken(token: string, userId: number): void {
+  public saveToken(token: string, userId: string): void {
     this.authRepository.saveToken(token, userId);
   }
 

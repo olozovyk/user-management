@@ -4,6 +4,6 @@ export interface ITokens {
 }
 
 export interface ITokenPayload {
-  id: number;
+  id: string;
   nickname: string;
 }
