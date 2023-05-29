@@ -100,9 +100,10 @@ export class AuthController {
   }
 
   @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  public async logout(@Req() req: Request) {
+  public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
+    res.clearCookie('token');
+    res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @Post('refresh')
