@@ -1,29 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
 import { CreateUserDto } from '../../dto/createUser.dto';
+import { getSkipForPagination } from 'src/utils';
+import { User } from 'src/entities/user.entity';
+import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 @Injectable()
 export class UsersService {
   constructor(private userRepository: UsersRepository) {}
 
-  getUsers(limit: number, page: number) {
-    const skip = (page - 1) * limit;
+  public getUsers(limit: number, page: number): Promise<User[]> {
+    const skip = getSkipForPagination(limit, page);
     return this.userRepository.getUsers(limit, skip);
   }
 
-  createUser(user: CreateUserDto) {
+  public createUser(user: CreateUserDto): Promise<User> {
     return this.userRepository.createUser(user);
   }
 
-  getUserByNickname(nickname: string) {
+  public getUserByNickname(nickname: string): Promise<User> {
     return this.userRepository.getUserByNickname(nickname);
   }
 
-  getUserById(id: number) {
+  public getUserById(id: string): Promise<User> {
     return this.userRepository.getUserById(id);
   }
 
-  editUser(id: number, user: Omit<Partial<CreateUserDto>, 'nickname'>) {
+  public editUser(
+    id: string,
+    user: Omit<Partial<CreateUserDto>, 'nickname'>,
+  ): Promise<UpdateResult> {
     return this.userRepository.editUser(id, user);
   }
 }

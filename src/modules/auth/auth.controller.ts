@@ -10,12 +10,11 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 
-import { CreateUserDto } from '../../dto/createUser.dto';
+import { CreateUserDto, LoginDto } from '../../dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from '../../dto/login.dto';
+import { User } from 'src/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -24,11 +23,10 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
-    private jwtService: JwtService,
   ) {}
 
   @Post('signup')
-  async signup(@Body() body: CreateUserDto) {
+  public async signup(@Body() body: CreateUserDto) {
     const password = this.authService.createHash(body.password);
 
     const user = {
@@ -50,7 +48,6 @@ export class AuthController {
     const newUser = await this.usersService.createUser(user);
 
     return {
-      statusCode: HttpStatus.CREATED,
       user: {
         id: newUser.id,
         nickname: newUser.nickname,
@@ -62,14 +59,14 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() body: LoginDto, @Res() res: Response) {
+  public async login(@Body() body: LoginDto, @Res() res: Response) {
     const existingUser = (await this.usersService.getUserByNickname(
       body.nickname,
-    )) as CreateUserDto & { id: number };
+    )) as User;
 
     if (!existingUser) {
       throw new HttpException(
-        'User with such a nickname is does not exist',
+        'User with such a nickname is not exist',
         HttpStatus.NOT_FOUND,
       );
     }
@@ -78,7 +75,7 @@ export class AuthController {
 
     if (password !== existingUser.password) {
       throw new HttpException(
-        'Password is not correct',
+        'Login or password is not correct',
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -92,8 +89,8 @@ export class AuthController {
     await this.authService.saveToken(refreshToken, existingUser.id);
 
     res.json({
-      statusCode: HttpStatus.OK,
       user: {
+        id: existingUser.id,
         nickname: existingUser.nickname,
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
@@ -103,24 +100,22 @@ export class AuthController {
   }
 
   @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@Req() req: Request) {
+  public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
+    res.clearCookie('token');
+    res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() req: Request, @Res() res: Response) {
+  public async refresh(@Req() req: Request, @Res() res: Response) {
     const oldToken = req.cookies.token;
 
     if (!oldToken) {
       throw new HttpException('Token is not provided', HttpStatus.BAD_REQUEST);
     }
 
-    const payload = (await this.authService.decodeToken(oldToken)) as {
-      id: number;
-      nickname: string;
-    };
+    const payload = await this.authService.decodeToken(oldToken);
 
     if (!payload || !payload.id || !payload.nickname) {
       throw new HttpException('Token is not valid', HttpStatus.UNAUTHORIZED);
@@ -141,7 +136,6 @@ export class AuthController {
     await this.authService.saveToken(refreshToken, existingUser.id);
 
     res.json({
-      statusCode: HttpStatus.OK,
       token: accessToken,
     });
   }

@@ -14,6 +14,8 @@ import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { IUser } from 'src/types';
+import { User } from 'src/entities/user.entity';
+import { QueryPaginationDto } from 'src/dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,37 +25,31 @@ export class UsersController {
   ) {}
 
   @Get()
-  async getUsers(@Query() query: { limit: string; page: string }) {
-    const limit = Number(query.limit) || 20;
-    const page = Number(query.page) || 1;
+  public async getUsers(@Query() query: QueryPaginationDto) {
+    const limit = query.limit || 20;
+    const page = query.page || 1;
 
-    const users = (await this.userService.getUsers(
-      limit,
-      page,
-    )) as (CreateUserDto & { id: number })[];
+    const users = (await this.userService.getUsers(limit, page)) as User[];
 
-    const usersToReturn: IUser[] = users.map(user => {
-      return {
-        id: user.id,
-        nickname: user.nickname,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      };
-    });
+    const usersToReturn: IUser[] = users.map(user => ({
+      id: user.id,
+      nickname: user.nickname,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    }));
 
     return {
-      statusCode: HttpStatus.OK,
       users: usersToReturn,
     };
   }
 
   @Patch(':id')
   @UseGuards(AuthGuard)
-  async editUser(
+  public async editUser(
     @Param() params: { id: string },
     @Body() body: Partial<CreateUserDto>,
   ) {
-    const id = Number(params.id);
+    const id = params.id;
     const { nickname, firstName, lastName, password } = body;
 
     if (nickname) {
@@ -94,12 +90,9 @@ export class UsersController {
       );
     }
 
-    const updatedUser = (await this.userService.getUserById(
-      id,
-    )) as CreateUserDto & { id: number };
+    const updatedUser = (await this.userService.getUserById(id)) as User;
 
     return {
-      statusCode: HttpStatus.OK,
       user: {
         id: updatedUser.id,
         nickname: updatedUser.nickname,
