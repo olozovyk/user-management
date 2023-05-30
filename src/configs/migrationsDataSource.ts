@@ -1,10 +1,10 @@
 import { DataSource } from 'typeorm';
 import { postgresConfig } from './postgres.config';
 
-const postgresDataSource = new DataSource({
+const migrationsDataSource = new DataSource({
   ...postgresConfig,
   entities: ['*/**/*.entity.ts'],
   migrations: ['*/migrations/*.ts'],
 });
 
-export default postgresDataSource;
+export default migrationsDataSource;
