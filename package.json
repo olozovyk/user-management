@@ -21,11 +21,11 @@
     "lint:prepare": "npm run format && npm run lint",
     "prepare": "husky install",
     "typeorm": "typeorm-ts-node-commonjs",
-    "migration:create": "npm run typeorm migration:create src/migrations/$NAME",
-    "migration:generate": "npm run typeorm migration:generate src/migrations/$NAME -- -d src/configs/postgres.dataSource.ts -p",
-    "migration:run": "npm run typeorm migration:run -- -d src/configs/postgres.dataSource.ts",
-    "migration:revert": "npm run typeorm migration:revert -- -d src/configs/postgres.dataSource.ts",
-    "migration:show": "npm run typeorm migration:show -- -d src/configs/postgres.dataSource.ts"
+    "migration:create": "npm run typeorm migration:create src/common/migrations/$NAME",
+    "migration:generate": "npm run typeorm migration:generate src/common/migrations/$NAME -- -d src/common/configs/migrationsDataSource.ts -p",
+    "migration:run": "npm run typeorm migration:run -- -d src/common/configs/migrationsDataSource.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d src/common/configs/migrationsDataSource.ts",
+    "migration:show": "npm run typeorm migration:show -- -d src/common/configs/migrationsDataSource.ts"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",

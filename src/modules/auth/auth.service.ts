@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
-import { ITokenPayload, ITokens } from 'src/types';
+import { ITokenPayload, ITokens } from 'src/common/types';
 
 @Injectable()
 export class AuthService {

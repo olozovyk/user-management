@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { UsersRepository } from '../users/users.repository';
-import { User } from 'src/entities/user.entity';
-import { Token } from 'src/entities/token.entity';
+import { User } from 'src/common/entities/user.entity';
+import { Token } from 'src/common/entities/token.entity';
 
 @Injectable()
 export class AuthRepository {

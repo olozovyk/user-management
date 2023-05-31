@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from './users.repository';
-import { CreateUserDto } from '../../dto/createUser.dto';
-import { getSkipForPagination } from 'src/utils';
-import { User } from 'src/entities/user.entity';
+import { CreateUserDto } from '../../common/dto/createUser.dto';
+import { getSkipForPagination } from 'src/common/utils';
+import { User } from 'src/common/entities/user.entity';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 @Injectable()

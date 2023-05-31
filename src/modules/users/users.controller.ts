@@ -9,13 +9,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CreateUserDto } from 'src/dto/createUser.dto';
+import { CreateUserDto } from 'src/common/dto/createUser.dto';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { IUser } from 'src/types';
-import { User } from 'src/entities/user.entity';
-import { QueryPaginationDto } from 'src/dto';
+import { AuthGuard } from 'src/common/guards/auth.guard';
+import { IUser } from 'src/common/types';
+import { User } from 'src/common/entities/user.entity';
+import { QueryPaginationDto } from 'src/common/dto';
 
 @Controller('users')
 export class UsersController {

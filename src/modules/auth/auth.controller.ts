@@ -11,10 +11,10 @@ import {
   Res,
 } from '@nestjs/common';
 
-import { CreateUserDto, LoginDto } from '../../dto';
+import { CreateUserDto, LoginDto } from '../../common/dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/common/entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
