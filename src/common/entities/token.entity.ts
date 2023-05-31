@@ -6,9 +6,12 @@ export class Token {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: false })
+  @Column()
   token: string;
 
-  @ManyToOne(() => User, user => user.token, { nullable: false })
+  @ManyToOne(() => User, user => user.token, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
   user: User;
 }

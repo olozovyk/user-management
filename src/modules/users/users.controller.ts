@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Param,
@@ -100,5 +102,12 @@ export class UsersController {
         lastName: updatedUser.lastName,
       },
     };
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard)
+  public async deleteUser(@Param() params: { id: string }) {
+    await this.userService.deleteUser(params.id);
   }
 }
