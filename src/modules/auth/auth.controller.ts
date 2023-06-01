@@ -113,30 +113,11 @@ export class AuthController {
   public async refresh(@Req() req: Request, @Res() res: Response) {
     const oldToken = req.cookies.token;
 
-    if (!oldToken) {
-      throw new HttpException('Token is not provided', HttpStatus.BAD_REQUEST);
-    }
-
-    const payload = await this.authService.decodeToken(oldToken);
-
-    if (!payload || !payload.id || !payload.nickname) {
-      throw new HttpException('Token is not valid', HttpStatus.UNAUTHORIZED);
-    }
-
-    const { accessToken, refreshToken } = await this.authService.createTokens(
-      payload.id,
-      payload.nickname,
+    const { accessToken, refreshToken } = await this.authService.refreshToken(
+      oldToken,
     );
 
-    const existingUser = await this.usersService.getUserById(payload.id);
-
-    if (!existingUser) {
-      throw new HttpException('User is not found', HttpStatus.NOT_FOUND);
-    }
-
     res.cookie('token', refreshToken, { httpOnly: true });
-    await this.authService.saveToken(refreshToken, existingUser.id);
-
     res.json({
       token: accessToken,
     });
