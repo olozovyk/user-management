@@ -4,6 +4,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   DeleteDateColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Token } from './token.entity';
 
@@ -26,6 +28,12 @@ export class User {
 
   @OneToMany(() => Token, token => token.user)
   token: Token[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @DeleteDateColumn()
   deletedAt: Date;
