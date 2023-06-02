@@ -1,9 +1,8 @@
 import {
   CanActivate,
   ExecutionContext,
+  ForbiddenException,
   Injectable,
-  Logger,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -14,34 +13,28 @@ import { Role, RoleType } from '../types';
 export class AuthGuard implements CanActivate {
   private configService = new ConfigService();
   private jwtService = new JwtService();
-  private logger = new Logger(AuthGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    try {
-      const request = context.switchToHttp().getRequest();
-      const token = this.extractTokenFromHeader(request);
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
 
-      await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get('JWT_ACCESS_SECRET'),
-      });
+    await this.jwtService.verifyAsync(token, {
+      secret: this.configService.get('JWT_ACCESS_SECRET'),
+    });
 
-      const payload = this.jwtService.decode(token) as {
-        id: string;
-        nickname: string;
-        role: RoleType;
-      };
+    const payload = this.jwtService.decode(token) as {
+      id: string;
+      nickname: string;
+      role: RoleType;
+    };
 
-      if (payload.id !== request.params.id && payload.role !== Role.ADMIN) {
-        throw new UnauthorizedException(`You don't have the necessary rights`);
-      }
-
-      request.user = payload;
-
-      return true;
-    } catch (e) {
-      this.logger.error(e);
-      return false;
+    if (payload.id !== request.params.id && payload.role !== Role.ADMIN) {
+      throw new ForbiddenException();
     }
+
+    request.user = payload;
+
+    return true;
   }
 
   private extractTokenFromHeader(request: Request): string | undefined {

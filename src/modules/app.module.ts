@@ -9,7 +9,7 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({ ...postgresConfig, autoLoadEntities: true }),
+    TypeOrmModule.forRoot({ ...postgresConfig }),
     AuthModule,
     UsersModule,
   ],

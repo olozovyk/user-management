@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 
-import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 import { ITokenPayload, IUser, Role } from 'src/common/types';
@@ -24,12 +23,14 @@ import { User } from 'src/common/entities/user.entity';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ProtectUserChangesGuard } from 'src/common/guards/protectUserChanges.guard';
 import { EditUserDto } from 'src/common/dto';
+import { createHash } from 'src/common/utils';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('users')
 export class UsersController {
   constructor(
-    private authService: AuthService,
     private userService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   @Get()
@@ -97,7 +98,13 @@ export class UsersController {
     }
 
     const newPassword = password
-      ? this.authService.createHash(password)
+      ? createHash({
+          password,
+          algorithm: this.configService.get('HASH_ALGORITHM'),
+          localSalt: this.configService.get('LOCAL_SALT'),
+          iterations: Number(this.configService.get('ITERATIONS')),
+          keylen: Number(this.configService.get('KEYLEN')),
+        })
       : undefined;
 
     const userToEdit: Omit<Partial<EditUserDto>, 'nickname'> = {};

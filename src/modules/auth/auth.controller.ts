@@ -3,9 +3,7 @@ import {
   Body,
   Controller,
   HttpCode,
-  HttpException,
   HttpStatus,
-  Logger,
   Post,
   Req,
   Res,
@@ -14,13 +12,10 @@ import {
 import { CreateUserDto, LoginDto } from '../../common/dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
-import { User } from 'src/common/entities/user.entity';
 import { IUser } from 'src/common/types';
 
 @Controller('auth')
 export class AuthController {
-  private logger = new Logger(AuthController.name);
-
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
@@ -31,25 +26,7 @@ export class AuthController {
     @Body() body: CreateUserDto,
     @Res() res: Response<{ user: IUser }>,
   ) {
-    const password = this.authService.createHash(body.password);
-
-    const user = {
-      ...body,
-      password,
-    };
-
-    const existingUser = await this.usersService.getUserByNickname(
-      user.nickname,
-    );
-
-    if (existingUser) {
-      throw new HttpException(
-        'Such a nickname already in use.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const newUser = await this.usersService.createUser(user);
+    const newUser = await this.usersService.createUser(body);
 
     res.set('Last-Modified', newUser.updatedAt.toUTCString());
     res.json({
@@ -69,43 +46,20 @@ export class AuthController {
     @Body() body: LoginDto,
     @Res() res: Response<{ user: IUser; token: string }>,
   ) {
-    const existingUser = (await this.usersService.getUserByNickname(
-      body.nickname,
-    )) as User;
-
-    if (!existingUser) {
-      throw new HttpException(
-        'User with such a nickname is not exist',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-
-    const password = this.authService.createHash(body.password);
-
-    if (password !== existingUser.password) {
-      throw new HttpException(
-        'Login or password is not correct',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    const { accessToken, refreshToken } = await this.authService.createTokens(
-      existingUser.id,
-      existingUser.nickname,
-      existingUser.role,
-    );
+    const {
+      user,
+      tokens: { accessToken, refreshToken },
+    } = await this.authService.login(body);
 
     res.cookie('token', refreshToken, { httpOnly: true });
-    await this.authService.saveToken(refreshToken, existingUser.id);
-
-    res.set('Last-Modified', existingUser.updatedAt.toUTCString());
+    res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
       user: {
-        id: existingUser.id,
-        nickname: existingUser.nickname,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
-        role: existingUser.role,
+        id: user.id,
+        nickname: user.nickname,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
       },
       token: accessToken,
     });

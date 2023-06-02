@@ -13,7 +13,7 @@ export class AuthRepository {
 
   private tokenRepository = this.dataSource.getRepository('Token');
 
-  public async getTokenByUser(user: User): Promise<Token> {
+  public getTokenByUser(user: User): Promise<Token> {
     return this.tokenRepository.findOneBy({ user }) as Promise<Token>;
   }
 

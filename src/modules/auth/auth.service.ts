@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -6,11 +7,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UsersService } from '../users/users.service';
+import { LoginDto } from 'src/common/dto';
+import { createHash } from 'src/common/utils';
+import { User } from 'src/common/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +25,41 @@ export class AuthService {
     private configService: ConfigService,
     private usersService: UsersService,
   ) {}
+
+  public async login(body: LoginDto): Promise<{ user: User; tokens: ITokens }> {
+    const existingUser = await this.usersService.getUserByNickname(
+      body.nickname,
+    );
+
+    if (!existingUser) {
+      throw new NotFoundException('User with such a nickname is not exist');
+    }
+
+    const password = createHash({
+      password: body.password,
+      algorithm: this.configService.get('HASH_ALGORITHM'),
+      localSalt: this.configService.get('LOCAL_SALT'),
+      iterations: Number(this.configService.get('ITERATIONS')),
+      keylen: Number(this.configService.get('KEYLEN')),
+    });
+
+    if (password !== existingUser.password) {
+      throw new BadRequestException('Login or password is not correct');
+    }
+
+    const tokens = await this.createTokens(
+      existingUser.id,
+      existingUser.nickname,
+      existingUser.role,
+    );
+
+    await this.saveToken(tokens.refreshToken, existingUser.id);
+
+    return {
+      user: existingUser,
+      tokens,
+    };
+  }
 
   public async createTokens(
     id: string,
@@ -62,25 +100,6 @@ export class AuthService {
     } catch (e) {
       this.logger.error('Token is not valid');
     }
-  }
-
-  public createHash(password: string): string {
-    const algorithm = this.configService.get('HASH_ALGORITHM');
-    const localSalt = this.configService.get('LOCAL_SALT');
-    const iterations = Number(this.configService.get('ITERATIONS'));
-    const keylen = Number(this.configService.get('KEYLEN'));
-
-    const remoteSalt = crypto
-      .createHash(algorithm)
-      .update(password)
-      .digest('hex');
-
-    const salt = localSalt + remoteSalt;
-
-    const hashToPassword = crypto
-      .pbkdf2Sync(password, salt, iterations, keylen, algorithm)
-      .toString('hex');
-    return hashToPassword + remoteSalt;
   }
 
   public deleteToken(token: string): void {
