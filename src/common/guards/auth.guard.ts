@@ -35,11 +35,7 @@ export class AuthGuard implements CanActivate {
         throw new UnauthorizedException(`You don't have the necessary rights`);
       }
 
-      request.user = {
-        id: payload.id,
-        nickname: payload.nickname,
-        role: payload.role,
-      };
+      request.user = payload;
 
       return true;
     } catch (e) {

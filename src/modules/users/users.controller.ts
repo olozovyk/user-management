@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpException,
@@ -9,19 +10,20 @@ import {
   Param,
   Patch,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
-import { CreateUserDto } from 'src/common/dto/createUser.dto';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { IUser } from 'src/common/types';
+import { ITokenPayload, IUser, Role } from 'src/common/types';
 import { User } from 'src/common/entities/user.entity';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ProtectUserChangesGuard } from 'src/common/guards/protectUserChanges.guard';
+import { EditUserDto } from 'src/common/dto';
 
 @Controller('users')
 export class UsersController {
@@ -76,11 +78,12 @@ export class UsersController {
   @UseGuards(ProtectUserChangesGuard)
   public async editUser(
     @Param() params: { id: string },
-    @Body() body: Partial<CreateUserDto>,
+    @Body() body: Partial<EditUserDto>,
+    @Req() req: Request & { user: ITokenPayload },
     @Res() res: Response<{ user: IUser }>,
   ) {
     const id = params.id;
-    const { nickname, firstName, lastName, password } = body;
+    const { nickname, firstName, lastName, password, role } = body;
 
     if (nickname) {
       throw new HttpException(
@@ -89,7 +92,7 @@ export class UsersController {
       );
     }
 
-    if (!firstName && !lastName && !password) {
+    if (!firstName && !lastName && !password && !role) {
       throw new HttpException('Nothing to change', HttpStatus.BAD_REQUEST);
     }
 
@@ -97,7 +100,7 @@ export class UsersController {
       ? this.authService.createHash(password)
       : undefined;
 
-    const userToEdit: Omit<Partial<CreateUserDto>, 'nickname'> = {};
+    const userToEdit: Omit<Partial<EditUserDto>, 'nickname'> = {};
 
     if (firstName) {
       userToEdit.firstName = firstName;
@@ -109,6 +112,14 @@ export class UsersController {
 
     if (password) {
       userToEdit.password = newPassword;
+    }
+
+    if (role && req.user.role !== Role.ADMIN) {
+      throw new ForbiddenException(`You don't have the necessary rights`);
+    }
+
+    if (role) {
+      userToEdit.role = role;
     }
 
     const resultOfUpdate = await this.userService.editUser(id, userToEdit);
