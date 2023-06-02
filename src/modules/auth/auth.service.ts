@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
-import { ITokenPayload, ITokens } from 'src/common/types';
+import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -23,19 +23,23 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  public async createTokens(id: string, nickname: string): Promise<ITokens> {
+  public async createTokens(
+    id: string,
+    nickname: string,
+    role: RoleType,
+  ): Promise<ITokens> {
     const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
     const accessTtl = this.configService.get('JWT_ACCESS_TTL');
     const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
     const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
 
     const accessToken = await this.jwtService.signAsync(
-      { id, nickname },
+      { id, nickname, role },
       { secret: accessSecret, expiresIn: accessTtl },
     );
 
     const refreshToken = await this.jwtService.signAsync(
-      { id, nickname },
+      { id, nickname, role },
       { secret: refreshSecret, expiresIn: refreshTtl },
     );
 
@@ -89,13 +93,14 @@ export class AuthService {
 
     const payload = await this.decodeToken(oldToken);
 
-    if (!payload || !payload.id || !payload.nickname) {
+    if (!payload || !payload.id || !payload.nickname || !payload.role) {
       throw new UnauthorizedException('Token is not valid');
     }
 
     const { accessToken, refreshToken } = await this.createTokens(
       payload.id,
       payload.nickname,
+      payload.role,
     );
 
     const existingUser = await this.usersService.getUserById(payload.id);

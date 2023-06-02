@@ -31,7 +31,9 @@ export class UsersController {
   ) {}
 
   @Get()
-  public async getUsers(@Query() query: QueryPaginationDto) {
+  public async getUsers(
+    @Query() query: QueryPaginationDto,
+  ): Promise<{ users: IUser[] }> {
     const limit = query.limit || 20;
     const page = query.page || 1;
 
@@ -42,6 +44,7 @@ export class UsersController {
       nickname: user.nickname,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
     }));
 
     return {
@@ -52,16 +55,19 @@ export class UsersController {
   @Get(':id')
   public async getUserById(
     @Param() params: { id: string },
-    @Res() res: Response,
+    @Res() res: Response<{ user: IUser }>,
   ) {
     const user = await this.userService.getUserById(params.id);
 
     res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
-      id: user.id,
-      nickname: user.nickname,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      user: {
+        id: user.id,
+        nickname: user.nickname,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
     });
   }
 
@@ -71,7 +77,7 @@ export class UsersController {
   public async editUser(
     @Param() params: { id: string },
     @Body() body: Partial<CreateUserDto>,
-    @Res() res: Response,
+    @Res() res: Response<{ user: IUser }>,
   ) {
     const id = params.id;
     const { nickname, firstName, lastName, password } = body;
@@ -123,6 +129,7 @@ export class UsersController {
         nickname: updatedUser.nickname,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
+        role: updatedUser.role,
       },
     });
   }

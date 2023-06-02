@@ -15,6 +15,7 @@ import { CreateUserDto, LoginDto } from '../../common/dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { User } from 'src/common/entities/user.entity';
+import { IUser } from 'src/common/types';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +27,10 @@ export class AuthController {
   ) {}
 
   @Post('signup')
-  public async signup(@Body() body: CreateUserDto, @Res() res: Response) {
+  public async signup(
+    @Body() body: CreateUserDto,
+    @Res() res: Response<{ user: IUser }>,
+  ) {
     const password = this.authService.createHash(body.password);
 
     const user = {
@@ -54,13 +58,17 @@ export class AuthController {
         nickname: newUser.nickname,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
+        role: newUser.role,
       },
     });
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  public async login(@Body() body: LoginDto, @Res() res: Response) {
+  public async login(
+    @Body() body: LoginDto,
+    @Res() res: Response<{ user: IUser; token: string }>,
+  ) {
     const existingUser = (await this.usersService.getUserByNickname(
       body.nickname,
     )) as User;
@@ -84,6 +92,7 @@ export class AuthController {
     const { accessToken, refreshToken } = await this.authService.createTokens(
       existingUser.id,
       existingUser.nickname,
+      existingUser.role,
     );
 
     res.cookie('token', refreshToken, { httpOnly: true });
@@ -96,6 +105,7 @@ export class AuthController {
         nickname: existingUser.nickname,
         firstName: existingUser.firstName,
         lastName: existingUser.lastName,
+        role: existingUser.role,
       },
       token: accessToken,
     });
@@ -110,7 +120,10 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  public async refresh(@Req() req: Request, @Res() res: Response) {
+  public async refresh(
+    @Req() req: Request,
+    @Res() res: Response<{ token: string }>,
+  ) {
     const oldToken = req.cookies.token;
 
     const { accessToken, refreshToken } = await this.authService.refreshToken(
