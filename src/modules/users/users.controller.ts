@@ -1,14 +1,19 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpException,
   HttpStatus,
   Param,
   Patch,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
+
 import { CreateUserDto } from 'src/common/dto/createUser.dto';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
@@ -16,6 +21,7 @@ import { AuthGuard } from 'src/common/guards/auth.guard';
 import { IUser } from 'src/common/types';
 import { User } from 'src/common/entities/user.entity';
 import { QueryPaginationDto } from 'src/common/dto';
+import { ProtectUserChangesGuard } from 'src/common/guards/protectUserChanges.guard';
 
 @Controller('users')
 export class UsersController {
@@ -43,11 +49,29 @@ export class UsersController {
     };
   }
 
+  @Get(':id')
+  public async getUserById(
+    @Param() params: { id: string },
+    @Res() res: Response,
+  ) {
+    const user = await this.userService.getUserById(params.id);
+
+    res.set('Last-Modified', user.updatedAt.toUTCString());
+    res.json({
+      id: user.id,
+      nickname: user.nickname,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
+  }
+
   @Patch(':id')
   @UseGuards(AuthGuard)
+  @UseGuards(ProtectUserChangesGuard)
   public async editUser(
     @Param() params: { id: string },
     @Body() body: Partial<CreateUserDto>,
+    @Res() res: Response,
   ) {
     const id = params.id;
     const { nickname, firstName, lastName, password } = body;
@@ -92,13 +116,21 @@ export class UsersController {
 
     const updatedUser = (await this.userService.getUserById(id)) as User;
 
-    return {
+    res.set('Last-Modified', updatedUser.updatedAt.toUTCString());
+    res.json({
       user: {
         id: updatedUser.id,
         nickname: updatedUser.nickname,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
       },
-    };
+    });
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard)
+  public async deleteUser(@Param() params: { id: string }) {
+    await this.userService.deleteUser(params.id);
   }
 }

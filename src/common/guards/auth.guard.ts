@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthGuard implements CanActivate {
   private configService = new ConfigService();
   private jwtService = new JwtService();
-  private logger = new Logger();
+  private logger = new Logger(AuthGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     try {
@@ -24,11 +24,12 @@ export class AuthGuard implements CanActivate {
       });
 
       const payload = this.jwtService.decode(token) as {
-        id: number;
+        id: string;
         nickname: string;
       };
 
-      if (payload.id !== Number(request.params.id)) {
+      if (payload.id !== request.params.id) {
+        this.logger.error(`Ids is different`);
         return false;
       }
 

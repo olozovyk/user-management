@@ -1,10 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens } from 'src/common/types';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +20,7 @@ export class AuthService {
     private authRepository: AuthRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private usersService: UsersService,
   ) {}
 
   public async createTokens(id: string, nickname: string): Promise<ITokens> {
@@ -74,5 +81,34 @@ export class AuthService {
 
   public deleteToken(token: string): void {
     this.authRepository.deleteToken(token);
+  }
+
+  public async refreshToken(oldToken: string): Promise<ITokens> {
+    await this.decodeToken(oldToken);
+    await this.deleteToken(oldToken);
+
+    const payload = await this.decodeToken(oldToken);
+
+    if (!payload || !payload.id || !payload.nickname) {
+      throw new UnauthorizedException('Token is not valid');
+    }
+
+    const { accessToken, refreshToken } = await this.createTokens(
+      payload.id,
+      payload.nickname,
+    );
+
+    const existingUser = await this.usersService.getUserById(payload.id);
+
+    if (!existingUser) {
+      throw new NotFoundException('User is not found');
+    }
+
+    await this.saveToken(refreshToken, existingUser.id);
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 }

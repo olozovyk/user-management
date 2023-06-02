@@ -32,4 +32,8 @@ export class UsersService {
   ): Promise<UpdateResult> {
     return this.userRepository.editUser(id, user);
   }
+
+  public deleteUser(id: string) {
+    this.userRepository.deleteUser(id);
+  }
 }

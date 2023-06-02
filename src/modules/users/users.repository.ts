@@ -32,4 +32,8 @@ export class UsersRepository {
   ): Promise<UpdateResult> {
     return this.userRepository.update({ id }, { ...user });
   }
+
+  public deleteUser(id: string): void {
+    this.userRepository.softDelete(id);
+  }
 }

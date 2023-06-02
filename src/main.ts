@@ -6,6 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from './common/filters/httpException.filter';
 
 async function bootstrap() {
+  process.env.TZ = 'UTC';
+
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
