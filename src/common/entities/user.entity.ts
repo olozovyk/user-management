@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Token } from './token.entity';
+import { Role, RoleType } from '../types';
 
 @Entity({ name: 'users' })
 export class User {
@@ -28,6 +29,13 @@ export class User {
 
   @OneToMany(() => Token, token => token.user)
   token: Token[];
+
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: RoleType;
 
   @CreateDateColumn()
   createdAt: Date;

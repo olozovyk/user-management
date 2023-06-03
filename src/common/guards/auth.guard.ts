@@ -3,10 +3,12 @@ import {
   ExecutionContext,
   Injectable,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Role, RoleType } from '../types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -26,14 +28,14 @@ export class AuthGuard implements CanActivate {
       const payload = this.jwtService.decode(token) as {
         id: string;
         nickname: string;
+        role: RoleType;
       };
 
-      if (payload.id !== request.params.id) {
-        this.logger.error(`Ids is different`);
-        return false;
+      if (payload.id !== request.params.id && payload.role !== Role.ADMIN) {
+        throw new UnauthorizedException(`You don't have the necessary rights`);
       }
 
-      request.user = { id: payload.id, nickname: payload.nickname };
+      request.user = payload;
 
       return true;
     } catch (e) {

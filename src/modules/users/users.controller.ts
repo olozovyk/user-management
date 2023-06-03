@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpException,
@@ -9,19 +10,20 @@ import {
   Param,
   Patch,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 
-import { CreateUserDto } from 'src/common/dto/createUser.dto';
 import { AuthService } from '../auth/auth.service';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { IUser } from 'src/common/types';
+import { ITokenPayload, IUser, Role } from 'src/common/types';
 import { User } from 'src/common/entities/user.entity';
 import { QueryPaginationDto } from 'src/common/dto';
 import { ProtectUserChangesGuard } from 'src/common/guards/protectUserChanges.guard';
+import { EditUserDto } from 'src/common/dto';
 
 @Controller('users')
 export class UsersController {
@@ -31,7 +33,9 @@ export class UsersController {
   ) {}
 
   @Get()
-  public async getUsers(@Query() query: QueryPaginationDto) {
+  public async getUsers(
+    @Query() query: QueryPaginationDto,
+  ): Promise<{ users: IUser[] }> {
     const limit = query.limit || 20;
     const page = query.page || 1;
 
@@ -42,6 +46,7 @@ export class UsersController {
       nickname: user.nickname,
       firstName: user.firstName,
       lastName: user.lastName,
+      role: user.role,
     }));
 
     return {
@@ -52,16 +57,19 @@ export class UsersController {
   @Get(':id')
   public async getUserById(
     @Param() params: { id: string },
-    @Res() res: Response,
+    @Res() res: Response<{ user: IUser }>,
   ) {
     const user = await this.userService.getUserById(params.id);
 
     res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
-      id: user.id,
-      nickname: user.nickname,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      user: {
+        id: user.id,
+        nickname: user.nickname,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
     });
   }
 
@@ -70,11 +78,12 @@ export class UsersController {
   @UseGuards(ProtectUserChangesGuard)
   public async editUser(
     @Param() params: { id: string },
-    @Body() body: Partial<CreateUserDto>,
-    @Res() res: Response,
+    @Body() body: Partial<EditUserDto>,
+    @Req() req: Request & { user: ITokenPayload },
+    @Res() res: Response<{ user: IUser }>,
   ) {
     const id = params.id;
-    const { nickname, firstName, lastName, password } = body;
+    const { nickname, firstName, lastName, password, role } = body;
 
     if (nickname) {
       throw new HttpException(
@@ -83,7 +92,7 @@ export class UsersController {
       );
     }
 
-    if (!firstName && !lastName && !password) {
+    if (!firstName && !lastName && !password && !role) {
       throw new HttpException('Nothing to change', HttpStatus.BAD_REQUEST);
     }
 
@@ -91,7 +100,7 @@ export class UsersController {
       ? this.authService.createHash(password)
       : undefined;
 
-    const userToEdit: Omit<Partial<CreateUserDto>, 'nickname'> = {};
+    const userToEdit: Omit<Partial<EditUserDto>, 'nickname'> = {};
 
     if (firstName) {
       userToEdit.firstName = firstName;
@@ -103,6 +112,14 @@ export class UsersController {
 
     if (password) {
       userToEdit.password = newPassword;
+    }
+
+    if (role && req.user.role !== Role.ADMIN) {
+      throw new ForbiddenException(`You don't have the necessary rights`);
+    }
+
+    if (role) {
+      userToEdit.role = role;
     }
 
     const resultOfUpdate = await this.userService.editUser(id, userToEdit);
@@ -123,6 +140,7 @@ export class UsersController {
         nickname: updatedUser.nickname,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
+        role: updatedUser.role,
       },
     });
   }
