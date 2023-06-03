@@ -1,17 +1,18 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
+
 import { UsersRepository } from './users.repository';
-import { CreateUserDto } from '../../common/dto';
 import { createHash, getSkipForPagination } from 'src/common/utils';
 import { User } from 'src/common/entities/user.entity';
-import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
-import { ConfigService } from '@nestjs/config';
+import { CreateUserDto, EditUserDto } from '../../common/dto';
+import { Role, RoleType } from '../../common/types';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private userRepository: UsersRepository,
-    private configService: ConfigService,
-  ) {}
+  constructor(private userRepository: UsersRepository) {}
 
   public getUsers(limit: number, page: number): Promise<User[]> {
     const skip = getSkipForPagination(limit, page);
@@ -19,13 +20,7 @@ export class UsersService {
   }
 
   public async createUser(user: CreateUserDto): Promise<User> {
-    const password = createHash({
-      password: user.password,
-      algorithm: this.configService.get('HASH_ALGORITHM'),
-      localSalt: this.configService.get('LOCAL_SALT'),
-      iterations: Number(this.configService.get('ITERATIONS')),
-      keylen: Number(this.configService.get('KEYLEN')),
-    });
+    const password = createHash(user.password);
 
     const userToCreate = {
       ...user,
@@ -49,11 +44,47 @@ export class UsersService {
     return this.userRepository.getUserById(id);
   }
 
-  public editUser(
+  public async editUser(
     id: string,
-    user: Omit<Partial<CreateUserDto>, 'nickname'>,
-  ): Promise<UpdateResult> {
-    return this.userRepository.editUser(id, user);
+    body: Partial<EditUserDto>,
+    userRole: RoleType,
+  ): Promise<User> {
+    const { nickname, firstName, lastName, password, role } = body;
+
+    if (nickname) {
+      throw new BadRequestException('You can not change the nickname');
+    }
+
+    if (!firstName && !lastName && !password && !role) {
+      throw new BadRequestException('Nothing to change');
+    }
+
+    const newPassword = password ? createHash(password) : undefined;
+
+    const userToEdit: Omit<Partial<EditUserDto>, 'nickname'> = {};
+
+    if (role && userRole !== Role.ADMIN) {
+      throw new ForbiddenException(`You don't have the required permissions`);
+    }
+
+    if (role) {
+      userToEdit.role = role;
+    }
+
+    if (firstName) {
+      userToEdit.firstName = firstName;
+    }
+
+    if (lastName) {
+      userToEdit.lastName = lastName;
+    }
+
+    if (password) {
+      userToEdit.password = newPassword;
+    }
+
+    await this.userRepository.editUser(id, userToEdit);
+    return this.userRepository.getUserById(id);
   }
 
   public deleteUser(id: string) {

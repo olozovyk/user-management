@@ -9,9 +9,10 @@ import {
   Res,
 } from '@nestjs/common';
 
-import { CreateUserDto, LoginDto } from '../../common/dto';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { mapUserOutput } from '../../common/utils';
+import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from 'src/common/types';
 
 @Controller('auth')
@@ -30,13 +31,7 @@ export class AuthController {
 
     res.set('Last-Modified', newUser.updatedAt.toUTCString());
     res.json({
-      user: {
-        id: newUser.id,
-        nickname: newUser.nickname,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        role: newUser.role,
-      },
+      user: mapUserOutput(newUser),
     });
   }
 
@@ -54,13 +49,7 @@ export class AuthController {
     res.cookie('token', refreshToken, { httpOnly: true });
     res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
-      user: {
-        id: user.id,
-        nickname: user.nickname,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-      },
+      user: mapUserOutput(user),
       token: accessToken,
     });
   }

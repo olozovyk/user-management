@@ -7,6 +7,7 @@ import {
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+
 import { Role, RoleType } from '../types';
 
 @Injectable()

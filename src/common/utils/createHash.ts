@@ -1,20 +1,11 @@
 import * as crypto from 'node:crypto';
 
-interface ICreateHash {
-  password: string;
-  algorithm: string;
-  localSalt: string;
-  iterations: number;
-  keylen: number;
-}
+export const createHash = (password: string): string => {
+  const algorithm = process.env.HASH_ALGORITHM;
+  const localSalt = process.env.LOCAL_SALT;
+  const iterations = Number(process.env.ITERATIONS);
+  const keylen = Number(process.env.KEYLEN);
 
-export const createHash = ({
-  password,
-  algorithm,
-  localSalt,
-  iterations,
-  keylen,
-}: ICreateHash): string => {
   const remoteSalt = crypto
     .createHash(algorithm)
     .update(password)

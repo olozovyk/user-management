@@ -35,13 +35,7 @@ export class AuthService {
       throw new NotFoundException('User with such a nickname is not exist');
     }
 
-    const password = createHash({
-      password: body.password,
-      algorithm: this.configService.get('HASH_ALGORITHM'),
-      localSalt: this.configService.get('LOCAL_SALT'),
-      iterations: Number(this.configService.get('ITERATIONS')),
-      keylen: Number(this.configService.get('KEYLEN')),
-    });
+    const password = createHash(body.password);
 
     if (password !== existingUser.password) {
       throw new BadRequestException('Login or password is not correct');
@@ -59,47 +53,6 @@ export class AuthService {
       user: existingUser,
       tokens,
     };
-  }
-
-  public async createTokens(
-    id: string,
-    nickname: string,
-    role: RoleType,
-  ): Promise<ITokens> {
-    const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-    const accessTtl = this.configService.get('JWT_ACCESS_TTL');
-    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
-    const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
-
-    const accessToken = await this.jwtService.signAsync(
-      { id, nickname, role },
-      { secret: accessSecret, expiresIn: accessTtl },
-    );
-
-    const refreshToken = await this.jwtService.signAsync(
-      { id, nickname, role },
-      { secret: refreshSecret, expiresIn: refreshTtl },
-    );
-
-    return {
-      accessToken,
-      refreshToken,
-    };
-  }
-
-  public saveToken(token: string, userId: string): void {
-    this.authRepository.saveToken(token, userId);
-  }
-
-  public async decodeToken(token: string): Promise<ITokenPayload> {
-    const secret = this.configService.get('JWT_REFRESH_SECRET');
-
-    try {
-      await this.jwtService.verifyAsync(token, { secret });
-      return this.jwtService.decode(token) as ITokenPayload;
-    } catch (e) {
-      this.logger.error('Token is not valid');
-    }
   }
 
   public deleteToken(token: string): void {
@@ -134,5 +87,46 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  private async createTokens(
+    id: string,
+    nickname: string,
+    role: RoleType,
+  ): Promise<ITokens> {
+    const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
+    const accessTtl = this.configService.get('JWT_ACCESS_TTL');
+    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+    const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
+
+    const accessToken = await this.jwtService.signAsync(
+      { id, nickname, role },
+      { secret: accessSecret, expiresIn: accessTtl },
+    );
+
+    const refreshToken = await this.jwtService.signAsync(
+      { id, nickname, role },
+      { secret: refreshSecret, expiresIn: refreshTtl },
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  private saveToken(token: string, userId: string): void {
+    this.authRepository.saveToken(token, userId);
+  }
+
+  private async decodeToken(token: string): Promise<ITokenPayload> {
+    const secret = this.configService.get('JWT_REFRESH_SECRET');
+
+    try {
+      await this.jwtService.verifyAsync(token, { secret });
+      return this.jwtService.decode(token) as ITokenPayload;
+    } catch (e) {
+      this.logger.error('Token is not valid');
+    }
   }
 }

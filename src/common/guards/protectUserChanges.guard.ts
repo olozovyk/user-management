@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from 'src/modules/users/users.service';
 
@@ -24,6 +25,10 @@ export class ProtectUserChangesGuard implements CanActivate {
 
     const id = request.params.id;
     const user = await this.userService.getUserById(id);
+
+    if (!user) {
+      throw new NotFoundException('User is not found');
+    }
 
     const updatedAtTimestamp = user.updatedAt.setMilliseconds(0);
     const ifUnmodifiedSinceTimestamp = new Date(
