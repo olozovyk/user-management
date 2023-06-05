@@ -90,4 +90,31 @@ export class UsersService {
   public deleteUser(id: string) {
     this.userRepository.deleteUser(id);
   }
+
+  // Should I return anything?
+  public vote(userId: string, targetUserId: string, value: number) {
+    if (userId === targetUserId) {
+      throw new BadRequestException('You cannot give the vote for yourself');
+    }
+
+    /*
+     * if value = 0
+     *  find vote
+     *  if vote:
+     *    delete vote
+     *    update rating (transaction)
+     *
+     * if value = -1 | 1
+     *  find vote
+     *    if !vote
+     *      create vote
+     *      update rating
+     *
+     *    if vote:
+     *      if (vote.value === value) => BadRequest (Already voted)
+     *      else:
+     *        update vote
+     *        update rating
+     * */
+  }
 }

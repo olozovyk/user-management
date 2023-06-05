@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { isArray } from 'class-validator';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -19,13 +20,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
-    const message = exception.message;
 
-    this.logger.error(message);
+    let message: string = exception.message;
 
-    response.status(status).json({
-      statusCode: status,
-      message,
-    });
+    if (exception.getResponse) {
+      const response = exception.getResponse() as {
+        message: string | string[];
+      };
+
+      if (response.message) {
+        message = isArray(response.message)
+          ? response.message.join(', ')
+          : response.message;
+      }
+    }
+
+    this.logger.error(JSON.stringify({ status, message }));
+
+    response.status(status).json({ message });
   }
 }

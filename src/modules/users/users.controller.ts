@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   Res,
@@ -18,7 +19,7 @@ import { Response, Request } from 'express';
 import { UsersService } from './users.service';
 import { AuthGuard, ProtectUserChangesGuard } from 'src/common/guards';
 import { mapUserOutput } from '../../common/utils';
-import { EditUserDto, QueryPaginationDto } from 'src/common/dto';
+import { EditUserDto, QueryPaginationDto, QueryVoteDto } from 'src/common/dto';
 import { ITokenPayload, IUser } from 'src/common/types';
 
 @Controller('users')
@@ -88,5 +89,16 @@ export class UsersController {
   @UseGuards(AuthGuard)
   public deleteUser(@Param() params: { id: string }) {
     this.userService.deleteUser(params.id);
+  }
+
+  @Post(':id/rating')
+  @UseGuards(AuthGuard)
+  @UseGuards(ProtectUserChangesGuard)
+  public vote(@Param() params: { id: string }, @Query() query: QueryVoteDto) {
+    this.userService.vote(params.id, query.user, query.value);
+
+    return {
+      message: 'Everything will be OK',
+    };
   }
 }
