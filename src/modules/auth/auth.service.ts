@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
@@ -6,11 +7,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UsersService } from '../users/users.service';
+import { LoginDto } from 'src/common/dto';
+import { createHash } from 'src/common/utils';
+import { User } from 'src/common/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -23,64 +26,33 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  public async createTokens(
-    id: string,
-    nickname: string,
-    role: RoleType,
-  ): Promise<ITokens> {
-    const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-    const accessTtl = this.configService.get('JWT_ACCESS_TTL');
-    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
-    const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
-
-    const accessToken = await this.jwtService.signAsync(
-      { id, nickname, role },
-      { secret: accessSecret, expiresIn: accessTtl },
+  public async login(body: LoginDto): Promise<{ user: User; tokens: ITokens }> {
+    const existingUser = await this.usersService.getUserByNickname(
+      body.nickname,
     );
 
-    const refreshToken = await this.jwtService.signAsync(
-      { id, nickname, role },
-      { secret: refreshSecret, expiresIn: refreshTtl },
+    if (!existingUser) {
+      throw new NotFoundException('User with such a nickname is not exist');
+    }
+
+    const password = createHash(body.password);
+
+    if (password !== existingUser.password) {
+      throw new BadRequestException('Login or password is not correct');
+    }
+
+    const tokens = await this.createTokens(
+      existingUser.id,
+      existingUser.nickname,
+      existingUser.role,
     );
+
+    await this.saveToken(tokens.refreshToken, existingUser.id);
 
     return {
-      accessToken,
-      refreshToken,
+      user: existingUser,
+      tokens,
     };
-  }
-
-  public saveToken(token: string, userId: string): void {
-    this.authRepository.saveToken(token, userId);
-  }
-
-  public async decodeToken(token: string): Promise<ITokenPayload> {
-    const secret = this.configService.get('JWT_REFRESH_SECRET');
-
-    try {
-      await this.jwtService.verifyAsync(token, { secret });
-      return this.jwtService.decode(token) as ITokenPayload;
-    } catch (e) {
-      this.logger.error('Token is not valid');
-    }
-  }
-
-  public createHash(password: string): string {
-    const algorithm = this.configService.get('HASH_ALGORITHM');
-    const localSalt = this.configService.get('LOCAL_SALT');
-    const iterations = Number(this.configService.get('ITERATIONS'));
-    const keylen = Number(this.configService.get('KEYLEN'));
-
-    const remoteSalt = crypto
-      .createHash(algorithm)
-      .update(password)
-      .digest('hex');
-
-    const salt = localSalt + remoteSalt;
-
-    const hashToPassword = crypto
-      .pbkdf2Sync(password, salt, iterations, keylen, algorithm)
-      .toString('hex');
-    return hashToPassword + remoteSalt;
   }
 
   public deleteToken(token: string): void {
@@ -115,5 +87,46 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  private async createTokens(
+    id: string,
+    nickname: string,
+    role: RoleType,
+  ): Promise<ITokens> {
+    const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
+    const accessTtl = this.configService.get('JWT_ACCESS_TTL');
+    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
+    const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
+
+    const accessToken = await this.jwtService.signAsync(
+      { id, nickname, role },
+      { secret: accessSecret, expiresIn: accessTtl },
+    );
+
+    const refreshToken = await this.jwtService.signAsync(
+      { id, nickname, role },
+      { secret: refreshSecret, expiresIn: refreshTtl },
+    );
+
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  private saveToken(token: string, userId: string): void {
+    this.authRepository.saveToken(token, userId);
+  }
+
+  private async decodeToken(token: string): Promise<ITokenPayload> {
+    const secret = this.configService.get('JWT_REFRESH_SECRET');
+
+    try {
+      await this.jwtService.verifyAsync(token, { secret });
+      return this.jwtService.decode(token) as ITokenPayload;
+    } catch (e) {
+      this.logger.error('Token is not valid');
+    }
   }
 }

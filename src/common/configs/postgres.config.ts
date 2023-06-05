@@ -11,4 +11,5 @@ export const postgresConfig: DataSourceOptions = {
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB_NAME,
   synchronize: false,
+  entities: ['*/**/*.entity.js'],
 };
