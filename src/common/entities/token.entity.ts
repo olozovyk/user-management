@@ -9,7 +9,7 @@ export class Token {
   @Column()
   token: string;
 
-  @ManyToOne(() => User, user => user.token, {
+  @ManyToOne(() => User, user => user.tokens, {
     nullable: false,
     onDelete: 'CASCADE',
   })

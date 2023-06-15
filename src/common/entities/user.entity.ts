@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Token } from './token.entity';
 import { Role, RoleType } from '../types';
+import { Vote } from './vote.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -28,7 +29,7 @@ export class User {
   password: string;
 
   @OneToMany(() => Token, token => token.user)
-  token: Token[];
+  tokens: Token[];
 
   @Column({
     type: 'enum',
@@ -36,6 +37,11 @@ export class User {
     default: Role.USER,
   })
   role: RoleType;
+
+  @Column({
+    default: 0,
+  })
+  rating: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -45,4 +51,10 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany(() => Vote, vote => vote.user)
+  votes: Vote[];
+
+  @OneToMany(() => Vote, vote => vote.targetUser)
+  receivedVotes: Vote[];
 }

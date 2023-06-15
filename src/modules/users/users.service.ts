@@ -91,30 +91,35 @@ export class UsersService {
     this.userRepository.deleteUser(id);
   }
 
-  // Should I return anything?
-  public vote(userId: string, targetUserId: string, value: number) {
+  public async vote(
+    userId: string,
+    targetUserId: string,
+    voteValue: number,
+  ): Promise<void> {
     if (userId === targetUserId) {
       throw new BadRequestException('You cannot give the vote for yourself');
     }
 
-    /*
-     * if value = 0
-     *  find vote
-     *  if vote:
-     *    delete vote
-     *    update rating (transaction)
-     *
-     * if value = -1 | 1
-     *  find vote
-     *    if !vote
-     *      create vote
-     *      update rating
-     *
-     *    if vote:
-     *      if (vote.value === value) => BadRequest (Already voted)
-     *      else:
-     *        update vote
-     *        update rating
-     * */
+    const existingVote = await this.userRepository.getVote(targetUserId);
+
+    if (!existingVote) {
+      await this.userRepository.createVoteAndCount(
+        userId,
+        targetUserId,
+        voteValue,
+      );
+      return;
+    }
+
+    if (voteValue === existingVote.voteValue) {
+      throw new BadRequestException('You have already voted for this user');
+    }
+
+    await this.userRepository.updateVoteAndRating(
+      existingVote,
+      userId,
+      targetUserId,
+      voteValue,
+    );
   }
 }

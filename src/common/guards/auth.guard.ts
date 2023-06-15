@@ -29,7 +29,13 @@ export class AuthGuard implements CanActivate {
       role: RoleType;
     };
 
-    if (payload.id !== request.params.id && payload.role !== Role.ADMIN) {
+    const isVoting = !!request.path.match(/voting$/);
+
+    if (
+      !isVoting &&
+      payload.id !== request.params.id &&
+      payload.role !== Role.ADMIN
+    ) {
       throw new ForbiddenException();
     }
 

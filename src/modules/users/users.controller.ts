@@ -19,7 +19,7 @@ import { Response, Request } from 'express';
 import { UsersService } from './users.service';
 import { AuthGuard, ProtectUserChangesGuard } from 'src/common/guards';
 import { mapUserOutput } from '../../common/utils';
-import { EditUserDto, QueryPaginationDto, QueryVoteDto } from 'src/common/dto';
+import { EditUserDto, QueryPaginationDto, VoteDto } from 'src/common/dto';
 import { ITokenPayload, IUser } from 'src/common/types';
 
 @Controller('users')
@@ -91,14 +91,23 @@ export class UsersController {
     this.userService.deleteUser(params.id);
   }
 
-  @Post(':id/rating')
+  @Post(':id/voting')
   @UseGuards(AuthGuard)
   @UseGuards(ProtectUserChangesGuard)
-  public vote(@Param() params: { id: string }, @Query() query: QueryVoteDto) {
-    this.userService.vote(params.id, query.user, query.value);
+  @HttpCode(201)
+  public async vote(
+    @Req() req,
+    @Param() params: { id: string },
+    @Query() query: VoteDto,
+  ) {
+    const userId = req.user.id;
+    const targetUserId = params.id;
+    const vote = query.vote;
+
+    await this.userService.vote(userId, targetUserId, vote);
 
     return {
-      message: 'Everything will be OK',
+      message: 'The vote is counted',
     };
   }
 }
