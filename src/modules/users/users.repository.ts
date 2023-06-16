@@ -4,8 +4,9 @@ import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 import { User } from 'src/common/entities/user.entity';
 import { CreateUserDto } from '../../common/dto';
-import { Vote } from '../../common/entities/vote.entity';
+import { Vote } from '../../common/entities';
 import { validateEntity } from '../../common/pipes';
+import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
 
 @Injectable()
 export class UsersRepository {
@@ -47,14 +48,11 @@ export class UsersRepository {
     this.userRepository.softDelete(id);
   }
 
-  public async getVote(targetUserId: string): Promise<Vote> {
-    const targetUser = await this.getUserById(targetUserId);
-
-    if (!targetUser) {
-      throw new NotFoundException('User is not found');
-    }
-
-    return this.voteRepository.findOneBy({ targetUser: { id: targetUserId } });
+  public async getVote(userId: string, targetUserId: string): Promise<Vote> {
+    return this.voteRepository.findOneBy({
+      user: { id: userId },
+      targetUser: { id: targetUserId },
+    });
   }
 
   public async createVoteAndCount(
@@ -72,31 +70,40 @@ export class UsersRepository {
 
     await validateEntity(newVote);
 
-    await this.dataSource.manager.transaction(
-      async transactionalEntityManager => {
-        await transactionalEntityManager.insert(Vote, newVote);
-
-        const rating = await this.countRating(userId, targetUserId, voteValue);
-
-        await transactionalEntityManager.update(User, targetUserId, { rating });
-      },
-    );
+    await this.saveVoteAndUpdateRating({
+      voteEntity: newVote,
+      userId,
+      targetUserId,
+      voteValue,
+    });
   }
 
-  public async updateVoteAndRating(
-    existingVote: Vote,
-    userId: string,
-    targetUserId: string,
-    voteValue: number,
-  ): Promise<void> {
+  public async updateVoteAndRating({
+    existingVote,
+    userId,
+    targetUserId,
+    voteValue,
+  }: IVoteUpdateParams): Promise<void> {
     existingVote.voteValue = voteValue;
     await validateEntity(existingVote);
 
+    await this.saveVoteAndUpdateRating({
+      voteEntity: existingVote,
+      userId,
+      targetUserId,
+      voteValue,
+    });
+  }
+
+  private async saveVoteAndUpdateRating({
+    voteEntity,
+    userId,
+    targetUserId,
+    voteValue,
+  }: IVoteSaveParams) {
     await this.dataSource.manager.transaction(
       async transactionalEntityManager => {
-        await transactionalEntityManager.update(Vote, existingVote.id, {
-          voteValue,
-        });
+        await transactionalEntityManager.save(voteEntity);
 
         const rating = await this.countRating(userId, targetUserId, voteValue);
 
@@ -110,15 +117,15 @@ export class UsersRepository {
     targetUserId: string,
     voteValue: number,
   ) {
-    return (
-      (await this.voteRepository.sum('voteValue', {
-        targetUser: {
-          id: targetUserId,
-        },
-        user: {
-          id: Not(Equal(userId)),
-        },
-      })) ?? voteValue
-    );
+    const sumWithoutUserVote = await this.voteRepository.sum('voteValue', {
+      targetUser: {
+        id: targetUserId,
+      },
+      user: {
+        id: Not(Equal(userId)),
+      },
+    });
+
+    return sumWithoutUserVote ? sumWithoutUserVote + voteValue : voteValue;
   }
 }

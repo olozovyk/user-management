@@ -28,9 +28,6 @@ export class User {
   @Column()
   password: string;
 
-  @OneToMany(() => Token, token => token.user)
-  tokens: Token[];
-
   @Column({
     type: 'enum',
     enum: Role,
@@ -51,6 +48,9 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany(() => Token, token => token.user)
+  tokens: Token[];
 
   @OneToMany(() => Vote, vote => vote.user)
   votes: Vote[];

@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from './user.entity';
-import { VoteValues } from '../types';
 import { IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
+import { User } from './user.entity';
+import { VoteValues } from '../types';
 
 @Entity({ name: 'votes' })
 export class Vote {

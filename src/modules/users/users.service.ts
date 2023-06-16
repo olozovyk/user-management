@@ -100,7 +100,10 @@ export class UsersService {
       throw new BadRequestException('You cannot give the vote for yourself');
     }
 
-    const existingVote = await this.userRepository.getVote(targetUserId);
+    const existingVote = await this.userRepository.getVote(
+      userId,
+      targetUserId,
+    );
 
     if (!existingVote) {
       await this.userRepository.createVoteAndCount(
@@ -115,11 +118,11 @@ export class UsersService {
       throw new BadRequestException('You have already voted for this user');
     }
 
-    await this.userRepository.updateVoteAndRating(
+    await this.userRepository.updateVoteAndRating({
       existingVote,
       userId,
       targetUserId,
       voteValue,
-    );
+    });
   }
 }
