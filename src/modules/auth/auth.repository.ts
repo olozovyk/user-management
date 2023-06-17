@@ -26,7 +26,8 @@ export class AuthRepository {
     const existingToken = await this.getTokenRecord(token);
 
     if (existingToken) {
-      this.tokenRepository.update({ token }, { token });
+      await this.tokenRepository.update({ token }, { token });
+      return;
     }
 
     this.tokenRepository.save({ token, user });

@@ -90,4 +90,39 @@ export class UsersService {
   public deleteUser(id: string) {
     this.userRepository.deleteUser(id);
   }
+
+  public async vote(
+    userId: string,
+    targetUserId: string,
+    voteValue: number,
+  ): Promise<void> {
+    if (userId === targetUserId) {
+      throw new BadRequestException('You cannot give the vote for yourself');
+    }
+
+    const existingVote = await this.userRepository.getVote(
+      userId,
+      targetUserId,
+    );
+
+    if (!existingVote) {
+      await this.userRepository.createVoteAndCount(
+        userId,
+        targetUserId,
+        voteValue,
+      );
+      return;
+    }
+
+    if (voteValue === existingVote.voteValue) {
+      throw new BadRequestException('You have already voted for this user');
+    }
+
+    await this.userRepository.updateVoteAndRating({
+      existingVote,
+      userId,
+      targetUserId,
+      voteValue,
+    });
+  }
 }

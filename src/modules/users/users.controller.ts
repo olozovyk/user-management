@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   Req,
   Res,
@@ -18,7 +19,7 @@ import { Response, Request } from 'express';
 import { UsersService } from './users.service';
 import { AuthGuard, ProtectUserChangesGuard } from 'src/common/guards';
 import { mapUserOutput } from '../../common/utils';
-import { EditUserDto, QueryPaginationDto } from 'src/common/dto';
+import { EditUserDto, QueryPaginationDto, VoteDto } from 'src/common/dto';
 import { ITokenPayload, IUser } from 'src/common/types';
 
 @Controller('users')
@@ -88,5 +89,25 @@ export class UsersController {
   @UseGuards(AuthGuard)
   public deleteUser(@Param() params: { id: string }) {
     this.userService.deleteUser(params.id);
+  }
+
+  @Post(':id/voting')
+  @UseGuards(AuthGuard)
+  @UseGuards(ProtectUserChangesGuard)
+  @HttpCode(201)
+  public async vote(
+    @Req() req,
+    @Param() params: { id: string },
+    @Query() query: VoteDto,
+  ) {
+    const userId = req.user.id;
+    const targetUserId = params.id;
+    const vote = query.vote;
+
+    await this.userService.vote(userId, targetUserId, vote);
+
+    return {
+      message: 'The vote is counted',
+    };
   }
 }

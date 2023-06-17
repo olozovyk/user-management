@@ -6,4 +6,5 @@ export interface IUser {
   firstName: string;
   lastName: string;
   role: RoleType;
+  rating: number;
 }
