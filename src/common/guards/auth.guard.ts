@@ -3,12 +3,13 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { Role, RoleType } from '../types';
+import { ITokenPayload, Role } from '../types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,15 +20,15 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    if (!token) {
+      throw new UnauthorizedException();
+    }
+
     await this.jwtService.verifyAsync(token, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
     });
 
-    const payload = this.jwtService.decode(token) as {
-      id: string;
-      nickname: string;
-      role: RoleType;
-    };
+    const payload = this.jwtService.decode(token) as ITokenPayload;
 
     const isVoting = !!request.path.match(/voting$/);
 
