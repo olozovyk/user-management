@@ -48,7 +48,10 @@ export class UsersRepository {
     this.userRepository.softDelete(id);
   }
 
-  public async getVote(userId: string, targetUserId: string): Promise<Vote> {
+  public async getVote(
+    userId: string,
+    targetUserId: string,
+  ): Promise<Vote | null> {
     return this.voteRepository.findOneBy({
       user: { id: userId },
       targetUser: { id: targetUserId },

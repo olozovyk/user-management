@@ -3,12 +3,13 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { Role, RoleType } from '../types';
+import { ITokenPayload, Role } from '../types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,27 +20,25 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    if (!token) {
+      throw new UnauthorizedException();
+    }
+
     await this.jwtService.verifyAsync(token, {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
     });
 
-    const payload = this.jwtService.decode(token) as {
-      id: string;
-      nickname: string;
-      role: RoleType;
-    };
-
-    const isVoting = !!request.path.match(/voting$/);
-
-    if (
-      !isVoting &&
-      payload.id !== request.params.id &&
-      payload.role !== Role.ADMIN
-    ) {
-      throw new ForbiddenException();
-    }
+    const payload = this.jwtService.decode(token) as ITokenPayload;
 
     request.user = payload;
+
+    const isThisVotingPath = !!request.path.match(/voting$/);
+    const isThisAdmin = payload.role === Role.ADMIN;
+    const areUserIdsTheSame = payload.id !== request.params.id;
+
+    if (!isThisVotingPath && !isThisAdmin && !areUserIdsTheSame) {
+      throw new ForbiddenException();
+    }
 
     return true;
   }

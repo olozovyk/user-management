@@ -119,7 +119,7 @@ export class AuthService {
     this.authRepository.saveToken(token, userId);
   }
 
-  private async decodeToken(token: string): Promise<ITokenPayload> {
+  private async decodeToken(token: string): Promise<ITokenPayload | void> {
     const secret = this.configService.get('JWT_REFRESH_SECRET');
 
     try {

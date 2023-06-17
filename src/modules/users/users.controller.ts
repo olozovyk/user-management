@@ -96,7 +96,7 @@ export class UsersController {
   @UseGuards(ProtectUserChangesGuard)
   @HttpCode(201)
   public async vote(
-    @Req() req,
+    @Req() req: Request & { user: ITokenPayload },
     @Param() params: { id: string },
     @Query() query: VoteDto,
   ) {
