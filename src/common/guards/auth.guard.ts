@@ -30,17 +30,15 @@ export class AuthGuard implements CanActivate {
 
     const payload = this.jwtService.decode(token) as ITokenPayload;
 
-    const isVoting = !!request.path.match(/voting$/);
+    request.user = payload;
 
-    if (
-      !isVoting &&
-      payload.id !== request.params.id &&
-      payload.role !== Role.ADMIN
-    ) {
+    const isThisVotingPath = !!request.path.match(/voting$/);
+    const isThisAdmin = payload.role === Role.ADMIN;
+    const areUserIdsTheSame = payload.id !== request.params.id;
+
+    if (!isThisVotingPath && !isThisAdmin && !areUserIdsTheSame) {
       throw new ForbiddenException();
     }
-
-    request.user = payload;
 
     return true;
   }

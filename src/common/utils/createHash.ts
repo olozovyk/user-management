@@ -7,7 +7,9 @@ export const createHash = (password: string): string => {
   const iterations = Number(process.env.ITERATIONS);
   const keylen = Number(process.env.KEYLEN);
 
-  if (!algorithm || localSalt || iterations || keylen) {
+  const areAllVarsExisting = algorithm && localSalt && iterations && keylen;
+
+  if (!areAllVarsExisting) {
     throw new BadRequestException('Add environment vars');
   }
 
