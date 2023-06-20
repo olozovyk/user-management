@@ -7,4 +7,5 @@ export interface IUser {
   lastName: string;
   role: RoleType;
   rating: number;
+  avatarUrl: string | null;
 }

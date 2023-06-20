@@ -5,14 +5,24 @@ import {
 } from '@nestjs/common';
 
 import { UsersRepository } from './users.repository';
-import { createHash, getSkipForPagination } from 'src/common/utils';
+import {
+  createHash,
+  getExtensionFromOriginalName,
+  getSkipForPagination,
+} from 'src/common/utils';
 import { User } from 'src/common/entities/user.entity';
 import { CreateUserDto, EditUserDto } from '../../common/dto';
 import { Role, RoleType } from '../../common/types';
+import { S3Service } from './s3.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
-  constructor(private userRepository: UsersRepository) {}
+  constructor(
+    private userRepository: UsersRepository,
+    private s3Service: S3Service,
+    private configService: ConfigService,
+  ) {}
 
   public getUsers(limit: number, page: number): Promise<User[]> {
     const skip = getSkipForPagination(limit, page);
@@ -36,7 +46,7 @@ export class UsersService {
     return this.userRepository.createUser(userToCreate);
   }
 
-  public getUserByNickname(nickname: string): Promise<User> {
+  public getUserByNickname(nickname: string): Promise<User | null> {
     return this.userRepository.getUserByNickname(nickname);
   }
 
@@ -124,5 +134,22 @@ export class UsersService {
       targetUserId,
       voteValue,
     });
+  }
+
+  public async uploadAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const fileExtension = getExtensionFromOriginalName(file.originalname);
+    const key = `${userId}.${fileExtension}`;
+
+    await this.s3Service.sendFile(file.buffer, key);
+
+    const publicUrl = this.configService.getOrThrow('OBJECT_PUBLIC_URL');
+    const avatarUrl = publicUrl + key;
+
+    await this.userRepository.saveAvatarUrl(userId, avatarUrl);
+
+    return avatarUrl;
   }
 }

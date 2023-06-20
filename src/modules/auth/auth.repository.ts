@@ -11,7 +11,7 @@ export class AuthRepository {
     private usersRepository: UsersRepository,
   ) {}
 
-  private tokenRepository = this.dataSource.getRepository('Token');
+  private tokenRepository = this.dataSource.getRepository<Token>('Token');
 
   public async saveToken(token: string, userId: string): Promise<void> {
     const user = await this.usersRepository.getUserById(userId);
@@ -37,7 +37,7 @@ export class AuthRepository {
     this.tokenRepository.delete({ token });
   }
 
-  private getTokenRecord(token: string): Promise<Token> {
-    return this.tokenRepository.findOneBy({ token }) as Promise<Token>;
+  private getTokenRecord(token: string): Promise<Token | null> {
+    return this.tokenRepository.findOneBy({ token });
   }
 }

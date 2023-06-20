@@ -2,17 +2,22 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   NotFoundException,
   Param,
+  ParseFilePipe,
   Patch,
   Post,
   Query,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 
@@ -21,6 +26,7 @@ import { AuthGuard, ProtectUserChangesGuard } from 'src/common/guards';
 import { mapUserOutput } from '../../common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from 'src/common/dto';
 import { ITokenPayload, IUser } from 'src/common/types';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('users')
 export class UsersController {
@@ -108,6 +114,31 @@ export class UsersController {
 
     return {
       message: 'The vote is counted',
+    };
+  }
+
+  @Post(':id/avatar')
+  @UseGuards(AuthGuard)
+  @UseGuards(ProtectUserChangesGuard)
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @Param() params: { id: string },
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 1024 * 1024 * 5,
+          }),
+          new FileTypeValidator({ fileType: 'image/(jpeg|png)' }),
+        ],
+      }),
+    )
+    avatar: Express.Multer.File,
+  ): Promise<{ avatarUrl: string }> {
+    const avatarUrl = await this.userService.uploadAvatar(params.id, avatar);
+
+    return {
+      avatarUrl,
     };
   }
 }

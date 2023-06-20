@@ -7,6 +7,7 @@ import { CreateUserDto } from '../../common/dto';
 import { Vote } from '../../common/entities';
 import { validateEntity } from '../../common/pipes';
 import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
+import { Avatar } from '../../common/entities';
 
 @Injectable()
 export class UsersRepository {
@@ -14,21 +15,32 @@ export class UsersRepository {
 
   private userRepository = this.dataSource.getRepository<User>('User');
   private voteRepository = this.dataSource.getRepository<Vote>('Vote');
+  private avatarRepository = this.dataSource.getRepository<Avatar>('Avatar');
 
   public getUsers(limit: number, skip: number): Promise<User[]> {
-    return this.userRepository.find({ take: limit, skip }) as Promise<User[]>;
+    return this.userRepository.find({
+      take: limit,
+      skip,
+      relations: { avatar: true },
+    });
   }
 
   public createUser(user: CreateUserDto): Promise<User> {
     return this.userRepository.save(user) as Promise<User>;
   }
 
-  public getUserByNickname(nickname: string): Promise<User> {
-    return this.userRepository.findOneBy({ nickname }) as Promise<User>;
+  public getUserByNickname(nickname: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { nickname },
+      relations: { avatar: true },
+    });
   }
 
   public async getUserById(id: string): Promise<User> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: { avatar: true },
+    });
 
     if (!user) {
       throw new NotFoundException('User is not found');
@@ -130,5 +142,13 @@ export class UsersRepository {
     });
 
     return sumWithoutUserVote ? sumWithoutUserVote + voteValue : voteValue;
+  }
+
+  public async saveAvatarUrl(userId: string, avatarUrl: string): Promise<void> {
+    const newAvatar = new Avatar();
+    newAvatar.user = await this.getUserById(userId);
+    newAvatar.avatarUrl = avatarUrl;
+
+    await this.avatarRepository.upsert(newAvatar, ['user']);
   }
 }
