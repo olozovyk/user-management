@@ -118,6 +118,8 @@ export class UsersController {
   }
 
   @Post(':id/avatar')
+  @UseGuards(AuthGuard)
+  @UseGuards(ProtectUserChangesGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(
     @Param() params: { id: string },
@@ -132,8 +134,8 @@ export class UsersController {
       }),
     )
     avatar: Express.Multer.File,
-  ) {
-    const avatarUrl = await this.userService.uploadAvatar(avatar, params.id);
+  ): Promise<{ avatarUrl: string }> {
+    const avatarUrl = await this.userService.uploadAvatar(params.id, avatar);
 
     return {
       avatarUrl,

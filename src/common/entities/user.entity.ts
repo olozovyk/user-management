@@ -6,10 +6,13 @@ import {
   DeleteDateColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Token } from './token.entity';
 import { Role, RoleType } from '../types';
 import { Vote } from './vote.entity';
+import { Avatar } from './avatar.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -57,4 +60,7 @@ export class User {
 
   @OneToMany(() => Vote, vote => vote.targetUser)
   receivedVotes: Vote[];
+
+  @OneToOne(() => Avatar, avatar => avatar.user, { cascade: true })
+  avatar: Avatar;
 }

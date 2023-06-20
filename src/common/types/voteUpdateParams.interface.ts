@@ -1,4 +1,4 @@
-import { Vote } from '../entities/vote.entity';
+import { Vote } from '../entities';
 
 export interface IVoteUpdateParams {
   existingVote: Vote;

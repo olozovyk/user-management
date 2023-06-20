@@ -46,7 +46,7 @@ export class UsersService {
     return this.userRepository.createUser(userToCreate);
   }
 
-  public getUserByNickname(nickname: string): Promise<User> {
+  public getUserByNickname(nickname: string): Promise<User | null> {
     return this.userRepository.getUserByNickname(nickname);
   }
 
@@ -137,8 +137,8 @@ export class UsersService {
   }
 
   public async uploadAvatar(
-    file: Express.Multer.File,
     userId: string,
+    file: Express.Multer.File,
   ): Promise<string> {
     const fileExtension = getExtensionFromOriginalName(file.originalname);
     const key = `${userId}.${fileExtension}`;
@@ -146,7 +146,10 @@ export class UsersService {
     await this.s3Service.sendFile(file.buffer, key);
 
     const publicUrl = this.configService.getOrThrow('OBJECT_PUBLIC_URL');
+    const avatarUrl = publicUrl + key;
 
-    return publicUrl + key;
+    await this.userRepository.saveAvatarUrl(userId, avatarUrl);
+
+    return avatarUrl;
   }
 }
