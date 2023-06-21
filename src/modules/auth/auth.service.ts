@@ -32,7 +32,7 @@ export class AuthService {
     );
 
     if (!existingUser) {
-      throw new NotFoundException('User with such a nickname is not exist');
+      throw new BadRequestException('Login or password is not correct');
     }
 
     const password = createHash(body.password);

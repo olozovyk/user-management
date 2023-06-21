@@ -14,7 +14,16 @@ import { UsersService } from '../users/users.service';
 import { mapUserOutput } from '../../common/utils';
 import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from 'src/common/types';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { CreateUserResDto } from '../../common/dto/openApi';
+import { LoginResDto } from '../../common/dto/openApi/loginRes.dto';
 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -23,6 +32,11 @@ export class AuthController {
   ) {}
 
   @Post('signup')
+  @ApiCreatedResponse({
+    description: 'The User is created',
+    type: CreateUserResDto,
+  })
+  @ApiBadRequestResponse({ description: 'Such a nickname already in use.' })
   public async signup(
     @Body() body: CreateUserDto,
     @Res() res: Response<{ user: IUser }>,
@@ -36,6 +50,8 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOkResponse({ description: 'Successful login', type: LoginResDto })
+  @ApiBadRequestResponse({ description: 'Login or password is not correct.' })
   @HttpCode(HttpStatus.OK)
   public async login(
     @Body() body: LoginDto,
