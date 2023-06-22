@@ -59,11 +59,7 @@ export class UsersService {
     body: Partial<EditUserDto>,
     userRole: RoleType,
   ): Promise<User> {
-    const { nickname, firstName, lastName, password, role } = body;
-
-    if (nickname) {
-      throw new BadRequestException('You can not change the nickname');
-    }
+    const { firstName, lastName, password, role } = body;
 
     if (!firstName && !lastName && !password && !role) {
       throw new BadRequestException('Nothing to change');

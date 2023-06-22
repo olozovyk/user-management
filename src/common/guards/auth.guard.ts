@@ -34,7 +34,7 @@ export class AuthGuard implements CanActivate {
 
     const isThisVotingPath = !!request.path.match(/voting$/);
     const isThisAdmin = payload.role === Role.ADMIN;
-    const areUserIdsTheSame = payload.id !== request.params.id;
+    const areUserIdsTheSame = payload.id === request.params.id;
 
     if (!isThisVotingPath && !isThisAdmin && !areUserIdsTheSame) {
       throw new ForbiddenException();

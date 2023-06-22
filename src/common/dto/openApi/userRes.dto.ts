@@ -14,7 +14,6 @@ export class UserResDto {
   @ApiProperty({ example: 'Walsh' })
   lastName: string;
 
-  // TODO add enum correctly
   @ApiProperty({ example: 'user', enum: Role })
   role: RoleType;
 

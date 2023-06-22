@@ -16,15 +16,20 @@ import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from 'src/common/types';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CreateUserResDto } from '../../common/dto/openApi';
+import { GetUserResDto } from '../../common/dto/openApi';
 import { LoginResDto } from '../../common/dto/openApi/loginRes.dto';
 
-@ApiTags('Authentication')
 @Controller('auth')
+@ApiTags('Authentication')
 export class AuthController {
   constructor(
     private authService: AuthService,
@@ -34,7 +39,7 @@ export class AuthController {
   @Post('signup')
   @ApiCreatedResponse({
     description: 'The User is created',
-    type: CreateUserResDto,
+    type: GetUserResDto,
   })
   @ApiBadRequestResponse({ description: 'Such a nickname already in use.' })
   public async signup(
@@ -50,7 +55,11 @@ export class AuthController {
   }
 
   @Post('login')
-  @ApiOkResponse({ description: 'Successful login', type: LoginResDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful login',
+    type: LoginResDto,
+  })
   @ApiBadRequestResponse({ description: 'Login or password is not correct.' })
   @HttpCode(HttpStatus.OK)
   public async login(
@@ -71,6 +80,9 @@ export class AuthController {
   }
 
   @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiBearerAuth()
+  @ApiNoContentResponse({ description: 'Logout successful' })
   public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
     res.clearCookie('token');
@@ -79,6 +91,9 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refreshes a token pair' })
+  @ApiOkResponse({ description: 'A token pair refreshed' })
+  @ApiUnauthorizedResponse({ description: 'Token is not valid' })
   public async refresh(
     @Req() req: Request,
     @Res() res: Response<{ token: string }>,

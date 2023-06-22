@@ -1,5 +1,5 @@
 import { UserResDto } from './userRes.dto';
 
-export class CreateUserResDto {
+export class GetUserResDto {
   user: UserResDto;
 }
