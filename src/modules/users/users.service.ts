@@ -93,8 +93,8 @@ export class UsersService {
     return this.userRepository.getUserById(id);
   }
 
-  public deleteUser(id: string) {
-    this.userRepository.deleteUser(id);
+  public async deleteUser(id: string) {
+    await this.userRepository.deleteUser(id);
   }
 
   public async vote(

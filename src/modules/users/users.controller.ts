@@ -40,15 +40,16 @@ import {
   ApiOkResponse,
   ApiTags,
   ApiUnauthorizedResponse,
-  PickType,
 } from '@nestjs/swagger';
-import { GetAllUsersResDto } from '../../common/dto/openApi/getAllUsersRes.dto';
-import { GetUserResDto, UserResDto } from '../../common/dto/openApi';
-import { FileUploadDto } from '../../common/dto/openApi/fileUpload.dto';
-import { AvatarResDto } from '../../common/dto/openApi/avatarRes.dto';
+import {
+  GetAllUsersResDto,
+  GetUserResDto,
+  FileUploadDto,
+  AvatarResDto,
+} from '../../common/dto/openApi';
 
 @Controller('users')
-@ApiTags('User')
+@ApiTags('Users')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
@@ -134,8 +135,8 @@ export class UsersController {
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)
-  public deleteUser(@Param('id') id: string) {
-    this.userService.deleteUser(id);
+  public async deleteUser(@Param('id') id: string) {
+    await this.userService.deleteUser(id);
   }
 
   @Post(':id/voting')

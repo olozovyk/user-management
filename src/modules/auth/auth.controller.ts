@@ -16,7 +16,6 @@ import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from 'src/common/types';
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOkResponse,
@@ -25,8 +24,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetUserResDto } from '../../common/dto/openApi';
-import { LoginResDto } from '../../common/dto/openApi/loginRes.dto';
+import { GetUserResDto, LoginResDto } from '../../common/dto/openApi';
 
 @Controller('auth')
 @ApiTags('Authentication')
@@ -80,9 +78,8 @@ export class AuthController {
   }
 
   @Post('logout')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiBearerAuth()
   @ApiNoContentResponse({ description: 'Logout successful' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
     res.clearCookie('token');
@@ -90,10 +87,10 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refreshes a token pair' })
   @ApiOkResponse({ description: 'A token pair refreshed' })
   @ApiUnauthorizedResponse({ description: 'Token is not valid' })
+  @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() req: Request,
     @Res() res: Response<{ token: string }>,
