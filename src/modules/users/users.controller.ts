@@ -27,12 +27,34 @@ import { mapUserOutput } from '../../common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from 'src/common/dto';
 import { ITokenPayload, IUser } from 'src/common/types';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiForbiddenResponse,
+  ApiHeader,
+  ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import {
+  GetAllUsersResDto,
+  GetUserResDto,
+  FileUploadDto,
+  AvatarResDto,
+} from '../../common/dto/openApi';
 
 @Controller('users')
+@ApiTags('Users')
 export class UsersController {
   constructor(private userService: UsersService) {}
 
   @Get()
+  @ApiOkResponse({ type: GetAllUsersResDto })
   public async getUsers(
     @Query() query: QueryPaginationDto,
   ): Promise<{ users: IUser[] }> {
@@ -49,11 +71,13 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOkResponse({ type: GetUserResDto })
+  @ApiNotFoundResponse({ description: 'User is not found' })
   public async getUserById(
-    @Param() params: { id: string },
+    @Param('id') id: string,
     @Res() res: Response<{ user: IUser }>,
   ) {
-    const user = await this.userService.getUserById(params.id);
+    const user = await this.userService.getUserById(id);
 
     if (!user) {
       throw new NotFoundException('User is not found');
@@ -66,16 +90,29 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @ApiHeader({
+    name: 'If-Unmodified-Since',
+    description: 'Last modified date',
+    required: true,
+  })
+  @ApiOkResponse({ description: 'An updated user', type: GetUserResDto })
+  @ApiNotFoundResponse({ description: 'User is not found' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @ApiBadRequestResponse({
+    description: 'The user information is not up to date',
+  })
   @UseGuards(AuthGuard)
   @UseGuards(ProtectUserChangesGuard)
   public async editUser(
-    @Param() params: { id: string },
-    @Body() body: Partial<EditUserDto>,
+    @Param('id') id: string,
+    @Body() body: EditUserDto,
     @Req() req: Request & { user: ITokenPayload },
     @Res() res: Response<{ user: IUser }>,
   ) {
     const updatedUser = await this.userService.editUser(
-      params.id,
+      id,
       body,
       req.user.role,
     );
@@ -91,23 +128,40 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @ApiNoContentResponse({ description: 'A user is deleted' })
+  @ApiNotFoundResponse({ description: 'User is not found' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)
-  public deleteUser(@Param() params: { id: string }) {
-    this.userService.deleteUser(params.id);
+  public async deleteUser(@Param('id') id: string) {
+    await this.userService.deleteUser(id);
   }
 
   @Post(':id/voting')
+  @ApiBearerAuth()
+  @ApiHeader({
+    name: 'If-Unmodified-Since',
+    description: 'Last modified date',
+    required: true,
+  })
+  @ApiOkResponse({ description: 'The vote is counted' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({
+    description:
+      'You cannot give the vote for yourself. You have already voted for this user.The user information is not up to date',
+  })
   @UseGuards(AuthGuard)
   @UseGuards(ProtectUserChangesGuard)
-  @HttpCode(201)
+  @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
-    @Param() params: { id: string },
+    @Param('id') id: string,
     @Query() query: VoteDto,
   ) {
     const userId = req.user.id;
-    const targetUserId = params.id;
+    const targetUserId = id;
     const vote = query.vote;
 
     await this.userService.vote(userId, targetUserId, vote);
@@ -118,11 +172,27 @@ export class UsersController {
   }
 
   @Post(':id/avatar')
+  @ApiBearerAuth()
+  @ApiHeader({
+    name: 'If-Unmodified-Since',
+    description: 'Last modified date',
+    required: true,
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'jpeg, png, no large than 5MB',
+    type: FileUploadDto,
+  })
+  @ApiCreatedResponse({ type: AvatarResDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiBadRequestResponse({
+    description: 'The user information is not up to date',
+  })
   @UseGuards(AuthGuard)
   @UseGuards(ProtectUserChangesGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(
-    @Param() params: { id: string },
+    @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -135,7 +205,7 @@ export class UsersController {
     )
     avatar: Express.Multer.File,
   ): Promise<{ avatarUrl: string }> {
-    const avatarUrl = await this.userService.uploadAvatar(params.id, avatar);
+    const avatarUrl = await this.userService.uploadAvatar(id, avatar);
 
     return {
       avatarUrl,

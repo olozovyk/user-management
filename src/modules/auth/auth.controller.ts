@@ -14,8 +14,20 @@ import { UsersService } from '../users/users.service';
 import { mapUserOutput } from '../../common/utils';
 import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from 'src/common/types';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { GetUserResDto, LoginResDto } from '../../common/dto/openApi';
 
 @Controller('auth')
+@ApiTags('Authentication')
 export class AuthController {
   constructor(
     private authService: AuthService,
@@ -23,6 +35,11 @@ export class AuthController {
   ) {}
 
   @Post('signup')
+  @ApiCreatedResponse({
+    description: 'The User is created',
+    type: GetUserResDto,
+  })
+  @ApiBadRequestResponse({ description: 'Such a nickname already in use.' })
   public async signup(
     @Body() body: CreateUserDto,
     @Res() res: Response<{ user: IUser }>,
@@ -36,6 +53,12 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiResponse({
+    status: 200,
+    description: 'Successful login',
+    type: LoginResDto,
+  })
+  @ApiBadRequestResponse({ description: 'Login or password is not correct.' })
   @HttpCode(HttpStatus.OK)
   public async login(
     @Body() body: LoginDto,
@@ -55,6 +78,8 @@ export class AuthController {
   }
 
   @Post('logout')
+  @ApiNoContentResponse({ description: 'Logout successful' })
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
     res.clearCookie('token');
@@ -62,6 +87,9 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiOperation({ summary: 'Refreshes a token pair' })
+  @ApiOkResponse({ description: 'A token pair refreshed' })
+  @ApiUnauthorizedResponse({ description: 'Token is not valid' })
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() req: Request,

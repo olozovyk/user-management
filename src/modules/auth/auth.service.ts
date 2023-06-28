@@ -32,7 +32,7 @@ export class AuthService {
     );
 
     if (!existingUser) {
-      throw new NotFoundException('User with such a nickname is not exist');
+      throw new BadRequestException('Login or password is not correct');
     }
 
     const password = createHash(body.password);
@@ -55,8 +55,8 @@ export class AuthService {
     };
   }
 
-  public deleteToken(token: string): void {
-    this.authRepository.deleteToken(token);
+  public async deleteToken(token: string): Promise<void> {
+    await this.authRepository.deleteToken(token);
   }
 
   public async refreshToken(oldToken: string): Promise<ITokens> {
@@ -115,8 +115,8 @@ export class AuthService {
     };
   }
 
-  private saveToken(token: string, userId: string): void {
-    this.authRepository.saveToken(token, userId);
+  private async saveToken(token: string, userId: string): Promise<void> {
+    await this.authRepository.saveToken(token, userId);
   }
 
   private async decodeToken(token: string): Promise<ITokenPayload | void> {

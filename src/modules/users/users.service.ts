@@ -59,11 +59,7 @@ export class UsersService {
     body: Partial<EditUserDto>,
     userRole: RoleType,
   ): Promise<User> {
-    const { nickname, firstName, lastName, password, role } = body;
-
-    if (nickname) {
-      throw new BadRequestException('You can not change the nickname');
-    }
+    const { firstName, lastName, password, role } = body;
 
     if (!firstName && !lastName && !password && !role) {
       throw new BadRequestException('Nothing to change');
@@ -97,8 +93,8 @@ export class UsersService {
     return this.userRepository.getUserById(id);
   }
 
-  public deleteUser(id: string) {
-    this.userRepository.deleteUser(id);
+  public async deleteUser(id: string) {
+    await this.userRepository.deleteUser(id);
   }
 
   public async vote(

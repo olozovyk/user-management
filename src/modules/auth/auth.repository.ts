@@ -30,11 +30,11 @@ export class AuthRepository {
       return;
     }
 
-    this.tokenRepository.save({ token, user });
+    await this.tokenRepository.save({ token, user });
   }
 
-  public deleteToken(token: string): void {
-    this.tokenRepository.delete({ token });
+  public async deleteToken(token: string): Promise<void> {
+    await this.tokenRepository.delete({ token });
   }
 
   private getTokenRecord(token: string): Promise<Token | null> {

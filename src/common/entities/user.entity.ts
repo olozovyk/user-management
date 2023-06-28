@@ -7,7 +7,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
-  JoinColumn,
 } from 'typeorm';
 import { Token } from './token.entity';
 import { Role, RoleType } from '../types';

@@ -1,6 +1,16 @@
 version: '3'
 
 services:
+  api:
+    build: .
+    restart: always
+    depends_on:
+      - postgres
+    volumes:
+      - /app/node_modules
+      - ./:/app
+    ports:
+      - ${DOCKER_COMPOSE_API_PORTS}
   postgres:
     image: postgres:15.3-alpine3.18
     restart: always
@@ -10,19 +20,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    ports:
-      - '9999:80'
 
 volumes:
   postgres_data:
-  pgadmin_data:

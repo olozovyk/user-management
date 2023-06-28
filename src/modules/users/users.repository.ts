@@ -56,8 +56,8 @@ export class UsersRepository {
     return this.userRepository.update({ id }, { ...user });
   }
 
-  public deleteUser(id: string): void {
-    this.userRepository.softDelete(id);
+  public async deleteUser(id: string): Promise<void> {
+    await this.userRepository.softDelete(id);
   }
 
   public async getVote(
