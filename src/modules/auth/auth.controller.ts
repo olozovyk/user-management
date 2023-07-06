@@ -13,7 +13,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { mapUserOutput } from '../../common/utils';
 import { CreateUserDto, LoginDto } from '../../common/dto';
-import { IUser } from 'src/common/types';
+import { IUser } from '../../common/types';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,

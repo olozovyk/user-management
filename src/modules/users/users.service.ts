@@ -3,18 +3,18 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { UsersRepository } from './users.repository';
 import {
   createHash,
   getExtensionFromOriginalName,
   getSkipForPagination,
-} from 'src/common/utils';
-import { User } from 'src/common/entities/user.entity';
+} from '../../common/utils';
+import { User } from '../../common/entities';
 import { CreateUserDto, EditUserDto } from '../../common/dto';
 import { Role, RoleType } from '../../common/types';
 import { S3Service } from './s3.service';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {

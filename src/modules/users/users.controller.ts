@@ -20,12 +20,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
-
-import { UsersService } from './users.service';
-import { AuthGuard, ProtectUserChangesGuard } from 'src/common/guards';
-import { mapUserOutput } from '../../common/utils';
-import { EditUserDto, QueryPaginationDto, VoteDto } from 'src/common/dto';
-import { ITokenPayload, IUser } from 'src/common/types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
@@ -41,6 +35,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+
+import { UsersService } from './users.service';
+import { AuthGuard, ProtectUserChangesGuard } from '../../common/guards';
+import { mapUserOutput } from '../../common/utils';
+import { EditUserDto, QueryPaginationDto, VoteDto } from '../../common/dto';
+import { ITokenPayload, IUser } from '../../common/types';
 import {
   GetAllUsersResDto,
   GetUserResDto,

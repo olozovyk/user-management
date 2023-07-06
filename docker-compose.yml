@@ -1,16 +1,6 @@
 version: '3'
 
 services:
-  api:
-    build: .
-    restart: always
-    depends_on:
-      - postgres
-    volumes:
-      - /app/node_modules
-      - ./:/app
-    ports:
-      - ${DOCKER_COMPOSE_API_PORTS}
   postgres:
     image: postgres:15.3-alpine3.18
     restart: always
@@ -20,6 +10,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - ${DOCKER_COMPOSE_POSTGRES_PORTS}
 
 volumes:
   postgres_data:
