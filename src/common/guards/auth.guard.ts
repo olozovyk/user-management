@@ -1,7 +1,6 @@
 import {
   CanActivate,
   ExecutionContext,
-  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -9,7 +8,7 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
-import { ITokenPayload, Role } from '../types';
+import { ITokenPayload } from '../types';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -28,17 +27,7 @@ export class AuthGuard implements CanActivate {
       secret: this.configService.get('JWT_ACCESS_SECRET'),
     });
 
-    const payload = this.jwtService.decode(token) as ITokenPayload;
-
-    request.user = payload;
-
-    const isThisVotingPath = !!request.path.match(/voting$/);
-    const isThisAdmin = payload.role === Role.ADMIN;
-    const areUserIdsTheSame = payload.id === request.params.id;
-
-    if (!isThisVotingPath && !isThisAdmin && !areUserIdsTheSame) {
-      throw new ForbiddenException();
-    }
+    request.user = this.jwtService.decode(token) as ITokenPayload;
 
     return true;
   }

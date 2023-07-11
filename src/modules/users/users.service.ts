@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -91,6 +92,10 @@ export class UsersService {
 
     await this.userRepository.editUser(id, userToEdit);
     return this.userRepository.getUserById(id);
+  }
+
+  public async softDeleteUser(id: string) {
+    await this.userRepository.softDeleteUser(id);
   }
 
   public async deleteUser(id: string) {

@@ -3,7 +3,7 @@ import { DataSource, Equal, Not } from 'typeorm';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 import { CreateUserDto } from '../../common/dto';
-import { Vote, User, Avatar } from '../../common/entities';
+import { Avatar, User, Vote } from '../../common/entities';
 import { validateEntity } from '../../common/pipes';
 import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
 
@@ -54,8 +54,12 @@ export class UsersRepository {
     return this.userRepository.update({ id }, { ...user });
   }
 
-  public async deleteUser(id: string): Promise<void> {
+  public async softDeleteUser(id: string): Promise<void> {
     await this.userRepository.softDelete(id);
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    await this.userRepository.delete(id);
   }
 
   public async getVote(

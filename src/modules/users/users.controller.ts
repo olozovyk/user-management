@@ -37,7 +37,12 @@ import {
 } from '@nestjs/swagger';
 
 import { UsersService } from './users.service';
-import { AuthGuard, ProtectUserChangesGuard } from '../../common/guards';
+import {
+  AuthGuard,
+  PermissionToChangeGuard,
+  ProtectUserChangesGuard,
+  UserNotFoundGuard,
+} from '../../common/guards';
 import { mapUserOutput } from '../../common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from '../../common/dto';
 import { ITokenPayload, IUser } from '../../common/types';
@@ -49,6 +54,7 @@ import {
 } from '../../common/dto/openApi';
 
 @Controller('users')
+@UseGuards(UserNotFoundGuard)
 @ApiTags('Users')
 export class UsersController {
   constructor(private userService: UsersService) {}
@@ -103,8 +109,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'The user information is not up to date',
   })
-  @UseGuards(AuthGuard)
-  @UseGuards(ProtectUserChangesGuard)
+  @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
   public async editUser(
     @Param('id') id: string,
     @Body() body: EditUserDto,
@@ -134,9 +139,9 @@ export class UsersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, PermissionToChangeGuard)
   public async deleteUser(@Param('id') id: string) {
-    await this.userService.deleteUser(id);
+    await this.userService.softDeleteUser(id);
   }
 
   @Post(':id/voting')
@@ -188,8 +193,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: 'The user information is not up to date',
   })
-  @UseGuards(AuthGuard)
-  @UseGuards(ProtectUserChangesGuard)
+  @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(
     @Param('id') id: string,
