@@ -12,9 +12,9 @@ export class PermissionToChangeGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const isThisAdmin = request.user.role === Role.ADMIN;
-    const areUserIdsTheSame = request.user.id === request.params.id;
+    const isTheSameId = request.user.id === request.params.id;
 
-    if (!isThisAdmin && !areUserIdsTheSame) {
+    if (!isThisAdmin && !isTheSameId) {
       throw new ForbiddenException(
         `You don't have permissions to change this user`,
       );

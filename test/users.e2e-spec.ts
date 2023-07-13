@@ -89,12 +89,12 @@ describe('Users (e2e)', () => {
   });
 
   afterEach(async () => {
-    if (user && user.id) {
+    if (user?.id) {
       await usersService.deleteUser(user.id);
       user = {};
     }
 
-    if (secondUser && secondUser.id) {
+    if (secondUser?.id) {
       await usersService.deleteUser(secondUser.id);
       secondUser = {};
     }
