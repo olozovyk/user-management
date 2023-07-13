@@ -14,10 +14,7 @@ const mockedUser: Partial<User> = {
 };
 
 const getUserByIdMocked = (nickname: string) => {
-  if (nickname === mockedUser.nickname) {
-    return mockedUser;
-  }
-  return null;
+  return nickname === mockedUser.nickname ? mockedUser : null;
 };
 
 describe('AuthService', () => {

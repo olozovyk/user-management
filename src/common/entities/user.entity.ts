@@ -49,7 +49,7 @@ export class User {
   updatedAt: Date;
 
   @DeleteDateColumn({ nullable: true })
-  deletedAt: Date | null;
+  deletedAt: Date;
 
   @OneToMany(() => Token, token => token.user)
   tokens: Token[];
