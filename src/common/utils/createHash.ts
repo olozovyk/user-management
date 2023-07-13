@@ -1,21 +1,16 @@
 import * as crypto from 'node:crypto';
 import * as dotenv from 'dotenv';
-
-import { BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 dotenv.config();
 
 export const createHash = (password: string): string => {
-  const algorithm = process.env.HASH_ALGORITHM;
-  const localSalt = process.env.LOCAL_SALT;
-  const iterations = Number(process.env.ITERATIONS);
-  const keylen = Number(process.env.KEYLEN);
+  const configService = new ConfigService();
 
-  const areAllVarsExisting = algorithm && localSalt && iterations && keylen;
-
-  if (!areAllVarsExisting) {
-    throw new BadRequestException('Add environment vars');
-  }
+  const algorithm = configService.getOrThrow<string>('HASH_ALGORITHM');
+  const localSalt = configService.getOrThrow<string>('LOCAL_SALT');
+  const iterations = Number(configService.getOrThrow('ITERATIONS'));
+  const keylen = Number(configService.getOrThrow('KEYLEN'));
 
   const remoteSalt = crypto
     .createHash(algorithm)

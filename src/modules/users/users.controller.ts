@@ -41,7 +41,7 @@ import {
   AuthGuard,
   PermissionToChangeGuard,
   ProtectUserChangesGuard,
-  UserNotFoundGuard,
+  UserExistingGuard,
 } from '../../common/guards';
 import { mapUserOutput } from '../../common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from '../../common/dto';
@@ -54,7 +54,7 @@ import {
 } from '../../common/dto/openApi';
 
 @Controller('users')
-@UseGuards(UserNotFoundGuard)
+@UseGuards(UserExistingGuard)
 @ApiTags('Users')
 export class UsersController {
   constructor(private userService: UsersService) {}
