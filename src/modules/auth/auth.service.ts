@@ -11,9 +11,9 @@ import { ConfigService } from '@nestjs/config';
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from 'src/common/dto';
-import { createHash } from 'src/common/utils';
-import { User } from 'src/common/entities/user.entity';
+import { LoginDto } from '../../common/dto';
+import { createHash } from '../../common/utils';
+import { User } from '../../common/entities';
 
 @Injectable()
 export class AuthService {

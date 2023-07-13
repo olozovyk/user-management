@@ -1,5 +1,9 @@
 import * as crypto from 'node:crypto';
+import * as dotenv from 'dotenv';
+
 import { BadRequestException } from '@nestjs/common';
+
+dotenv.config();
 
 export const createHash = (password: string): string => {
   const algorithm = process.env.HASH_ALGORITHM;

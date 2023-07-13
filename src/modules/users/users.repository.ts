@@ -2,12 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Equal, Not } from 'typeorm';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
-import { User } from 'src/common/entities/user.entity';
 import { CreateUserDto } from '../../common/dto';
-import { Vote } from '../../common/entities';
+import { Avatar, User, Vote } from '../../common/entities';
 import { validateEntity } from '../../common/pipes';
 import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
-import { Avatar } from '../../common/entities';
 
 @Injectable()
 export class UsersRepository {
@@ -56,8 +54,12 @@ export class UsersRepository {
     return this.userRepository.update({ id }, { ...user });
   }
 
-  public async deleteUser(id: string): Promise<void> {
+  public async softDeleteUser(id: string): Promise<void> {
     await this.userRepository.softDelete(id);
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    await this.userRepository.delete(id);
   }
 
   public async getVote(

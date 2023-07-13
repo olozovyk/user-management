@@ -2,19 +2,20 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 import { UsersRepository } from './users.repository';
 import {
   createHash,
   getExtensionFromOriginalName,
   getSkipForPagination,
-} from 'src/common/utils';
-import { User } from 'src/common/entities/user.entity';
+} from '../../common/utils';
+import { User } from '../../common/entities';
 import { CreateUserDto, EditUserDto } from '../../common/dto';
 import { Role, RoleType } from '../../common/types';
 import { S3Service } from './s3.service';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -91,6 +92,10 @@ export class UsersService {
 
     await this.userRepository.editUser(id, userToEdit);
     return this.userRepository.getUserById(id);
+  }
+
+  public async softDeleteUser(id: string) {
+    await this.userRepository.softDeleteUser(id);
   }
 
   public async deleteUser(id: string) {
