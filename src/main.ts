@@ -20,7 +20,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.setGlobalPrefix('user-management/api');
+  app.setGlobalPrefix('um/api');
 
   const config = new DocumentBuilder()
     .addBearerAuth()
@@ -29,7 +29,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('user-management/api/docs', app, document);
+  SwaggerModule.setup('um/api/docs', app, document);
 
   const configService = app.get(ConfigService);
   await app.listen(configService.get('PORT') || 8080);
