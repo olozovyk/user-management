@@ -1,13 +1,11 @@
-FROM node:alpine
-
+FROM node:20-alpine
 WORKDIR /app
-
-EXPOSE 8080
-
 COPY package*.json ./
-
-RUN npm install
-
+RUN npm ci
 COPY . .
-
+RUN npm uninstall dev-dependencies
+RUN apk update && \
+    apk upgrade && \
+    apk add --no-cache curl
 CMD ["npm", "start"]
+EXPOSE $PORT
