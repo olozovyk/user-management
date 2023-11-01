@@ -1,73 +1,86 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# User Management
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<img alt="NestJS" height="70" src="https://drive.google.com/uc?export=download&id=1_rJ8EderaxLPKOsUBsMyZ7AC79-FHzPo" />&nbsp;&nbsp;
+<img alt="REST API" height="70" src="https://drive.google.com/uc?export=download&id=1r-uydWNt9DEdH3HZ454tz_JOduKi_e_7" />&nbsp;&nbsp;
+<img alt="TypeORM" height="70" src="https://drive.google.com/uc?export=download&id=1aiNlnf9ZcVoEoDFAi3DwVnGINzOyuzWD" />&nbsp;&nbsp;
+<img alt="PostreSQL" height="70" src="https://drive.google.com/uc?export=download&id=1ZpAvyLxNyD5GVwVOyxpnEH9qTKx2ICJJ" />&nbsp;&nbsp;
+<img alt="Docker" height="70" src="https://drive.google.com/uc?export=download&id=1H_xnywHh-LsaGKcbPpA4ftJXUsYd_YP8" />&nbsp;&nbsp;
+<img alt="AWS S3" height="70" src="https://drive.google.com/uc?export=download&id=1WCUbfGiWwOYC1nGSxPoD3lh5jHCind1T" />&nbsp;&nbsp;
+<img alt="AWS EC2" height="70" src="https://drive.google.com/uc?export=download&id=1zAcogeDM9McUWaJitNp61ZF_swkKsuTt" />&nbsp;&nbsp;
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+The service is responsible for user management, authentication and authorization
+(with roles). It was created using NestJS, and PostgreSQL is used for data
+storage through TypeORM. Interaction with AWS S3 for storing user avatars has
+been implemented. The service also includes Swagger documentation and unit
+tests, as well as end-to-end tests.
 
-## Description
+You can familiarize with the API through
+[Swagger](https://ec2-52-58-90-89.eu-central-1.compute.amazonaws.com/um/api/docs).
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+To run the project locally, first install npm dependencies using the npm install
+command and set environment variables in the .env file. See the example in the
+.env.example file.
 
-## Installation
+### To run the project use one of the following commands:
 
 ```bash
-$ npm install
-```
+$ npm start
 
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
+# in development mode
 $ npm run start:dev
-
-# production mode
-$ npm run start:prod
 ```
 
-## Test
+### The project consists of two main modules:
 
-```bash
-# unit tests
-$ npm run test
+- auth - responsible for operations related to authentication
+- user - implementing functionality for user editing, adding avatar and voting
 
-# e2e tests
-$ npm run test:e2e
+### DB schema:
 
-# test coverage
-$ npm run test:cov
+User:
+
+```
+{
+	id: uuid,
+	nickname: string,
+	firstName: string,
+	lastName: string,
+	password: string,
+	role: 'user' | 'moderator' | 'admin',
+	rating: number,
+	createdAt: Date,
+	updatedAt: Date,
+	deletedAt: Date
+}
 ```
 
-## Support
+Token:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+{
+	id: uuid,
+	token: string,
+	userId: uuid (many-to-one)
+}
+```
 
-## Stay in touch
+Avatar:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+{
+	id: uuid,
+	avatarUrl: string,
+	userId: uuid (many-to-one)
+}
+```
 
-## License
+Vote:
 
-Nest is [MIT licensed](LICENSE).
+```
+{
+	id: uuid,
+	userId: uuid,
+	targetUserId: uuid,
+	voteValue: number (many-to-one)
+}
+```
