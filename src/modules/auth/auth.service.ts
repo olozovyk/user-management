@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
-import { UsersService } from '../users/users.service';
+import { UserService } from '../user/user.service';
 import { LoginDto } from '../../common/dto';
 import { createHash } from '../../common/utils';
 import { User } from '../../common/entities';
@@ -23,7 +23,7 @@ export class AuthService {
     private authRepository: AuthRepository,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private usersService: UsersService,
+    private usersService: UserService,
   ) {}
 
   public async login(body: LoginDto): Promise<{ user: User; tokens: ITokens }> {

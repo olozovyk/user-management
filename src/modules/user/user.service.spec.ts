@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from './users.service';
-import { UsersRepository } from './users.repository';
+import { UserService } from './user.service';
+import { UserRepository } from './user.repository';
 import { S3Service } from './s3.service';
 import { ConfigService } from '@nestjs/config';
 import { User } from '../../common/entities';
@@ -26,22 +26,22 @@ const userRepositoryMocked = {
 const s3ServiceMocked = { sendFile: jest.fn() };
 
 describe('UsersService', () => {
-  let usersService: UsersService;
-  let usersRepository: Partial<UsersRepository> = userRepositoryMocked;
+  let usersService: UserService;
+  let usersRepository: Partial<UserRepository> = userRepositoryMocked;
   let s3Service: Partial<S3Service> = s3ServiceMocked;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         ConfigService,
         { provide: S3Service, useValue: s3Service },
-        { provide: UsersRepository, useValue: usersRepository },
+        { provide: UserRepository, useValue: usersRepository },
       ],
     }).compile();
 
-    usersService = module.get<UsersService>(UsersService);
-    usersRepository = module.get<UsersRepository>(UsersRepository);
+    usersService = module.get<UserService>(UserService);
+    usersRepository = module.get<UserRepository>(UserRepository);
     s3Service = module.get<S3Service>(S3Service);
   });
 

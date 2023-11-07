@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UsersRepository } from './users.repository';
+import { UserRepository } from './user.repository';
 import {
   createHash,
   getExtensionFromOriginalName,
@@ -18,9 +18,9 @@ import { Role, RoleType } from '../../common/types';
 import { S3Service } from './s3.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
-    private userRepository: UsersRepository,
+    private userRepository: UserRepository,
     private s3Service: S3Service,
     private configService: ConfigService,
   ) {}

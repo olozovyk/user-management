@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
+import { UserService } from '../user/user.service';
 import { mapUserOutput } from '../../common/utils';
 import { CreateUserDto, LoginDto } from '../../common/dto';
 import { IUser } from '../../common/types';
@@ -31,7 +31,7 @@ import { GetUserResDto, LoginResDto } from '../../common/dto/openApi';
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersService: UsersService,
+    private usersService: UserService,
   ) {}
 
   @Post('signup')

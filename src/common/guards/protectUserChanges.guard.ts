@@ -6,11 +6,11 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { UsersService } from '../../modules/users/users.service';
+import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class ProtectUserChangesGuard implements CanActivate {
-  constructor(private userService: UsersService) {}
+  constructor(private userService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

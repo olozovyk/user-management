@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { postgresConfig } from '../common/configs';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { UserModule } from './user/user.module';
 import { HealthcheckModule } from './healthcheck/healthcheck.module';
 
 @Module({
@@ -12,7 +12,7 @@ import { HealthcheckModule } from './healthcheck/healthcheck.module';
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({ ...postgresConfig }),
     AuthModule,
-    UsersModule,
+    UserModule,
     HealthcheckModule,
   ],
   controllers: [],

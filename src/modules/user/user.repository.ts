@@ -8,7 +8,7 @@ import { validateEntity } from '../../common/pipes';
 import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
 
 @Injectable()
-export class UsersRepository {
+export class UserRepository {
   constructor(private dataSource: DataSource) {}
 
   private userRepository = this.dataSource.getRepository<User>('User');

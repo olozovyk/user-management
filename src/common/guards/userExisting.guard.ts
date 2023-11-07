@@ -4,11 +4,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { UsersService } from '../../modules/users/users.service';
+import { UserService } from '../../modules/user/user.service';
 
 @Injectable()
 export class UserExistingGuard implements CanActivate {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UsersService } from '../users/users.service';
+import { UserService } from '../user/user.service';
 import { AuthRepository } from './auth.repository';
 import { User } from '../../common/entities';
 import * as createHashUtil from '../../common/utils/createHash';
@@ -22,7 +22,7 @@ describe('AuthService', () => {
   let authRepository: Partial<AuthRepository> = {
     saveToken: jest.fn(),
   };
-  const usersService: Partial<UsersService> = {
+  const usersService: Partial<UserService> = {
     getUserByNickname: jest.fn().mockImplementation(getUserByIdMocked),
   };
 
@@ -33,7 +33,7 @@ describe('AuthService', () => {
         JwtService,
         ConfigService,
         { provide: AuthRepository, useValue: authRepository },
-        { provide: UsersService, useValue: usersService },
+        { provide: UserService, useValue: usersService },
       ],
     }).compile();
 

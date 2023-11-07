@@ -5,11 +5,11 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from '../src/modules/app.module';
 import { User } from '../src/common/entities';
-import { UsersService } from '../src/modules/users/users.service';
+import { UserService } from '../src/modules/user/user.service';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
-  let usersService: UsersService;
+  let usersService: UserService;
 
   const uuidSplit = uuidv4().slice(0, 15);
 
@@ -62,7 +62,7 @@ describe('Users (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    usersService = moduleFixture.get<UsersService>(UsersService);
+    usersService = moduleFixture.get<UserService>(UserService);
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
@@ -158,7 +158,7 @@ describe('Users (e2e)', () => {
       .expect(403);
   });
 
-  it('/users/:id/ (PATCH) 404 - fail (user is not found)', async () => {
+  it('/user/:id/ (PATCH) 404 - fail (user is not found)', async () => {
     await request(app.getHttpServer())
       .patch(`/users/${uuidv4()}`)
       .send({ firstName: createUserDto.firstName + '_' })
@@ -176,7 +176,7 @@ describe('Users (e2e)', () => {
       .expect(403);
   });
 
-  it('/users/:id/ (PATCH) 200 - success (first name is changed)', async () => {
+  it('/user/:id/ (PATCH) 200 - success (first name is changed)', async () => {
     await request(app.getHttpServer())
       .patch(`/users/${user.id}`)
       .send({ firstName: createUserDto.firstName + '_' })
@@ -185,14 +185,14 @@ describe('Users (e2e)', () => {
       .expect(200);
   });
 
-  it('/users/:id (DELETE) 404 - fail (user is not found)', async () => {
+  it('/user/:id (DELETE) 404 - fail (user is not found)', async () => {
     await request(app.getHttpServer())
       .delete(`/users/${uuidv4()}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(404);
   });
 
-  it('/users/:id (DELETE) 403 - fail (user is trying delete another user)', async () => {
+  it('/user/:id (DELETE) 403 - fail (user is trying delete another user)', async () => {
     const tokenForSecondUser = await createAndLoginSecondUser();
 
     await request(app.getHttpServer())
@@ -201,7 +201,7 @@ describe('Users (e2e)', () => {
       .expect(403);
   });
 
-  it('/users/:id (DELETE) 204', async () => {
+  it('/user/:id (DELETE) 204', async () => {
     await request(app.getHttpServer())
       .delete(`/users/${user.id}`)
       .set('Authorization', `Bearer ${token}`)

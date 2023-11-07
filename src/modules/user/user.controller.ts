@@ -36,7 +36,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 import {
   AuthGuard,
   PermissionToChangeGuard,
@@ -56,8 +56,8 @@ import {
 @Controller('users')
 @UseGuards(UserExistingGuard)
 @ApiTags('Users')
-export class UsersController {
-  constructor(private userService: UsersService) {}
+export class UserController {
+  constructor(private userService: UserService) {}
 
   @Get()
   @ApiOkResponse({ type: GetAllUsersResDto })
