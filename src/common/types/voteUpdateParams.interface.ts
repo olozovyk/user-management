@@ -1,4 +1,4 @@
-import { Vote } from '../entities';
+import { Vote } from '@modules/user/entities';
 
 export interface IVoteSaveParams {
   voteEntity: Vote;

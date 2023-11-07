@@ -10,10 +10,10 @@ import { ConfigService } from '@nestjs/config';
 
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
-import { UserService } from '../user/user.service';
-import { LoginDto } from '../../common/dto';
-import { createHash } from '../../common/utils';
-import { User } from '../../common/entities';
+import { UserService } from '@modules/user/user.service';
+import { LoginDto } from '@common/dto';
+import { createHash } from '@common/utils';
+import { User } from '@modules/user/entities';
 
 @Injectable()
 export class AuthService {

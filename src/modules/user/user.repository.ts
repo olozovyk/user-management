@@ -2,10 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Equal, Not } from 'typeorm';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
-import { CreateUserDto } from '../../common/dto';
-import { Avatar, User, Vote } from '../../common/entities';
-import { validateEntity } from '../../common/pipes';
-import { IVoteSaveParams, IVoteUpdateParams } from '../../common/types';
+import { CreateUserDto } from '@common/dto';
+import { Avatar, User, Vote } from './entities';
+import { validateEntity } from '@common/pipes';
+import { IVoteSaveParams, IVoteUpdateParams } from '@common/types';
 
 @Injectable()
 export class UserRepository {

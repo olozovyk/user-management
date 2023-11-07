@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -11,10 +10,10 @@ import {
   createHash,
   getExtensionFromOriginalName,
   getSkipForPagination,
-} from '../../common/utils';
-import { User } from '../../common/entities';
-import { CreateUserDto, EditUserDto } from '../../common/dto';
-import { Role, RoleType } from '../../common/types';
+} from '@common/utils';
+import { User } from './entities';
+import { CreateUserDto, EditUserDto } from '@common/dto';
+import { Role, RoleType } from '@common/types';
 import { S3Service } from './s3.service';
 
 @Injectable()

@@ -1,4 +1,4 @@
-import { User } from '../entities';
+import { User } from '@modules/user/entities';
 import { IUser } from '../types';
 
 export const mapUserOutput = (user: User): IUser => {

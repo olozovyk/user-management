@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
   OneToOne,
 } from 'typeorm';
-import { Token } from './token.entity';
-import { Role, RoleType } from '../types';
+import { Token } from '@modules/auth/entities';
+import { Role, RoleType } from '@common/types';
 import { Vote } from './vote.entity';
 import { Avatar } from './avatar.entity';
 
