@@ -1,12 +1,12 @@
 # User Management
 
-<img alt="NestJS" height="70" src="https://drive.google.com/uc?export=download&id=1_rJ8EderaxLPKOsUBsMyZ7AC79-FHzPo" />&nbsp;&nbsp;
-<img alt="REST API" height="70" src="https://drive.google.com/uc?export=download&id=1r-uydWNt9DEdH3HZ454tz_JOduKi_e_7" />&nbsp;&nbsp;
-<img alt="TypeORM" height="70" src="https://drive.google.com/uc?export=download&id=1aiNlnf9ZcVoEoDFAi3DwVnGINzOyuzWD" />&nbsp;&nbsp;
-<img alt="PostreSQL" height="70" src="https://drive.google.com/uc?export=download&id=1ZpAvyLxNyD5GVwVOyxpnEH9qTKx2ICJJ" />&nbsp;&nbsp;
-<img alt="Docker" height="70" src="https://drive.google.com/uc?export=download&id=1H_xnywHh-LsaGKcbPpA4ftJXUsYd_YP8" />&nbsp;&nbsp;
-<img alt="AWS S3" height="70" src="https://drive.google.com/uc?export=download&id=1WCUbfGiWwOYC1nGSxPoD3lh5jHCind1T" />&nbsp;&nbsp;
-<img alt="AWS EC2" height="70" src="https://drive.google.com/uc?export=download&id=1zAcogeDM9McUWaJitNp61ZF_swkKsuTt" />&nbsp;&nbsp;
+<img alt="NestJS" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/nestjs_h70.png" />&nbsp;&nbsp;
+<img alt="REST API" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/rest_h70.png" />&nbsp;&nbsp;
+<img alt="TypeORM" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/typeorm_h70.png" />&nbsp;&nbsp;
+<img alt="PostreSQL" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/postgres_h70.png" />&nbsp;&nbsp;
+<img alt="Docker" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/docker_h70.png" />&nbsp;&nbsp;
+<img alt="AWS S3" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/s3_h70.png" />&nbsp;&nbsp;
+<img alt="AWS EC2" height="70" src="https://github-tools-icons.s3.eu-central-1.amazonaws.com/ec2_h70.png" />&nbsp;&nbsp;
 
 The service is responsible for user management, authentication and authorization
 (with roles). It was created using NestJS, and PostgreSQL is used for data
@@ -18,8 +18,8 @@ You can familiarize with the API through
 [Swagger](https://ec2-52-58-90-89.eu-central-1.compute.amazonaws.com/um/api/docs).
 
 To run the project locally, first install npm dependencies using the npm install
-command and set environment variables in the .env file. See the example in the
-.env.example file.
+command and set environment variables in the ```.env``` file. See the example in the
+```.env.example``` file.
 
 ### To run the project use one of the following commands:
 
@@ -29,6 +29,8 @@ $ npm start
 # in development mode
 $ npm run start:dev
 ```
+Base URL for local API deployment: ```localhost:PORT/um/api/``` Set the port value in your ```.env``` file and replace PORT 
+with the specified value before launching the API server.
 
 ### The project consists of two main modules:
 
@@ -60,7 +62,7 @@ Token:
 {
 	id: uuid,
 	token: string,
-	userId: uuid (many-to-one)
+	userId: User (many-to-one)
 }
 ```
 
@@ -70,7 +72,7 @@ Avatar:
 {
 	id: uuid,
 	avatarUrl: string,
-	userId: uuid (many-to-one)
+	userId: User (many-to-one)
 }
 ```
 
@@ -79,8 +81,8 @@ Vote:
 ```
 {
 	id: uuid,
-	userId: uuid,
-	targetUserId: uuid,
-	voteValue: number (many-to-one)
+	userId: User (many-to-one),
+	targetUserId: User (many-to-one),
+	voteValue: number 
 }
 ```
