@@ -30,20 +30,7 @@ export class UserService {
   }
 
   public async createUser(user: CreateUserDto): Promise<User> {
-    const password = createHash(user.password);
-
-    const userToCreate = {
-      ...user,
-      password,
-    };
-
-    const existingUser = await this.getUserByNickname(user.nickname);
-
-    if (existingUser) {
-      throw new BadRequestException('Such a nickname already in use.');
-    }
-
-    return this.userRepository.createUser(userToCreate);
+    return this.userRepository.createUser(user);
   }
 
   public getUserByNickname(nickname: string): Promise<User | null> {

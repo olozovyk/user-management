@@ -10,10 +10,9 @@ import {
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { UserService } from '../user/user.service';
-import { mapUserOutput } from '../../common/utils';
-import { CreateUserDto, LoginDto } from '../../common/dto';
-import { IUser } from '../../common/types';
+import { mapUserOutput } from '@common/utils';
+import { CreateUserDto, LoginDto } from '@common/dto';
+import { IUser } from '@common/types';
 import {
   ApiBadRequestResponse,
   ApiCreatedResponse,
@@ -24,15 +23,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetUserResDto, LoginResDto } from '../../common/dto/openApi';
+import { GetUserResDto, LoginResDto } from '@common/dto/openApi';
 
 @Controller('auth')
 @ApiTags('Authentication')
 export class AuthController {
-  constructor(
-    private authService: AuthService,
-    private usersService: UserService,
-  ) {}
+  constructor(private authService: AuthService) {}
 
   @Post('signup')
   @ApiCreatedResponse({
@@ -44,7 +40,7 @@ export class AuthController {
     @Body() body: CreateUserDto,
     @Res() res: Response<{ user: IUser }>,
   ) {
-    const newUser = await this.usersService.createUser(body);
+    const newUser = await this.authService.signup(body);
 
     res.set('Last-Modified', newUser.updatedAt.toUTCString());
     res.json({

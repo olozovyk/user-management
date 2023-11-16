@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UserService } from '@modules/user/user.service';
-import { LoginDto } from '@common/dto';
+import { CreateUserDto, LoginDto } from '@common/dto';
 import { createHash } from '@common/utils';
 import { User } from '@modules/user/entities';
 
@@ -25,6 +25,25 @@ export class AuthService {
     private configService: ConfigService,
     private usersService: UserService,
   ) {}
+
+  public async signup(user: CreateUserDto): Promise<User> {
+    const password = createHash(user.password);
+
+    const userToCreate = {
+      ...user,
+      password,
+    };
+
+    const existingUser = await this.usersService.getUserByNickname(
+      user.nickname,
+    );
+
+    if (existingUser) {
+      throw new BadRequestException('Such a nickname already in use.');
+    }
+
+    return this.usersService.createUser(userToCreate);
+  }
 
   public async login(body: LoginDto): Promise<{ user: User; tokens: ITokens }> {
     const existingUser = await this.usersService.getUserByNickname(
