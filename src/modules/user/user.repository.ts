@@ -1,19 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, Equal, Not } from 'typeorm';
+import { DataSource, Equal, Not, Repository } from 'typeorm';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
-import { CreateUserDto } from '@common/dto';
+import { CreateUserDto } from '@modules/auth/dto';
 import { Avatar, User, Vote } from './entities';
 import { validateEntity } from '@common/pipes';
 import { IVoteSaveParams, IVoteUpdateParams } from '@common/types';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserRepository {
-  constructor(private dataSource: DataSource) {}
-
-  private userRepository = this.dataSource.getRepository<User>('User');
-  private voteRepository = this.dataSource.getRepository<Vote>('Vote');
-  private avatarRepository = this.dataSource.getRepository<Avatar>('Avatar');
+  constructor(
+    private readonly dataSource: DataSource,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(Vote) private readonly voteRepository: Repository<Vote>,
+    @InjectRepository(Avatar)
+    private readonly avatarRepository: Repository<Avatar>,
+  ) {}
 
   public getUsers(limit: number, skip: number): Promise<User[]> {
     return this.userRepository.find({

@@ -3,9 +3,9 @@ import * as request from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 
-import { AppModule } from '../src/modules/app.module';
-import { User } from '../src/common/entities';
-import { UserService } from '../src/modules/user/user.service';
+import { AppModule } from '@modules/app.module';
+import { User } from '@modules/user/entities';
+import { UserService } from '@modules/user/user.service';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;

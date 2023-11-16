@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthRepository } from './auth.repository';
 import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UserService } from '@modules/user/user.service';
-import { CreateUserDto, LoginDto } from '@common/dto';
+import { CreateUserDto, LoginDto } from './dto';
 import { createHash } from '@common/utils';
 import { User } from '@modules/user/entities';
 

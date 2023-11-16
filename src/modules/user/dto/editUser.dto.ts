@@ -1,5 +1,5 @@
 import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
-import { Role, RoleType } from '../types';
+import { Role, RoleType } from '@common/types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditUserDto {

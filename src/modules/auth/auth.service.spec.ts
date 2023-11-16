@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/user.service';
 import { AuthRepository } from './auth.repository';
-import { User } from '../../common/entities';
+import { User } from '@modules/user/entities';
 import * as createHashUtil from '../../common/utils/createHash';
 
 const mockedUser: Partial<User> = {

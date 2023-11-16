@@ -1,17 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { Token } from './entities';
 import { UserService } from '../user/user.service';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthRepository {
   constructor(
-    private dataSource: DataSource,
+    @InjectRepository(Token)
+    private readonly tokenRepository: Repository<Token>,
     private readonly userService: UserService,
   ) {}
-
-  private tokenRepository = this.dataSource.getRepository<Token>('Token');
 
   public async saveToken(token: string, userId: string): Promise<void> {
     const user = await this.userService.getUserById(userId);

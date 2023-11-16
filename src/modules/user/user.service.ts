@@ -12,7 +12,8 @@ import {
   getSkipForPagination,
 } from '@common/utils';
 import { User } from './entities';
-import { CreateUserDto, EditUserDto } from '@common/dto';
+import { CreateUserDto } from '@modules/auth/dto';
+import { EditUserDto } from './dto';
 import { Role, RoleType } from '@common/types';
 import { S3Service } from './s3.service';
 

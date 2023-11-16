@@ -11,7 +11,7 @@ import {
 
 import { AuthService } from './auth.service';
 import { mapUserOutput } from '@common/utils';
-import { CreateUserDto, LoginDto } from '@common/dto';
+import { CreateUserDto, LoginDto } from './dto';
 import { IUser } from '@common/types';
 import {
   ApiBadRequestResponse,

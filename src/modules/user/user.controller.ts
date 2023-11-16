@@ -42,16 +42,16 @@ import {
   PermissionToChangeGuard,
   ProtectUserChangesGuard,
   UserExistingGuard,
-} from '../../common/guards';
-import { mapUserOutput } from '../../common/utils';
-import { EditUserDto, QueryPaginationDto, VoteDto } from '../../common/dto';
-import { ITokenPayload, IUser } from '../../common/types';
+} from '@common/guards';
+import { mapUserOutput } from '@common/utils';
+import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
+import { ITokenPayload, IUser } from '@common/types';
 import {
   GetAllUsersResDto,
   GetUserResDto,
   FileUploadDto,
   AvatarResDto,
-} from '../../common/dto/openApi';
+} from '@common/dto/openApi';
 
 @Controller('users')
 @UseGuards(UserExistingGuard)
