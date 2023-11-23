@@ -144,7 +144,7 @@ export class UserController {
     await this.userService.softDeleteUser(id);
   }
 
-  @Post(':id/voting')
+  @Post(':id/rating')
   @ApiBearerAuth()
   @ApiHeader({
     name: 'If-Unmodified-Since',
@@ -162,17 +162,14 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
-    @Param('id') id: string,
-    @Query() query: VoteDto,
+    @Param('id') targetUserId: string,
+    @Body() { vote }: VoteDto,
   ) {
     const userId = req.user.id;
-    const targetUserId = id;
-    const vote = query.vote;
-
     await this.userService.vote(userId, targetUserId, vote);
 
     return {
-      message: 'The vote is counted',
+      message: vote === 0 ? 'The vote is removed' : 'The vote is received',
     };
   }
 

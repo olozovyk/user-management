@@ -4,8 +4,7 @@ import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 import { CreateUserDto } from '@modules/auth/dto';
 import { Avatar, User, Vote } from './entities';
-import { validateEntity } from '@common/pipes';
-import { IVoteSaveParams, IVoteUpdateParams } from '@common/types';
+import { IVoteSaveParams, IVoteUpdateParams, VoteType } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -75,11 +74,11 @@ export class UserRepository {
     });
   }
 
-  public async createVoteAndCount(
+  public async createVote(
     userId: string,
     targetUserId: string,
-    voteValue: number,
-  ): Promise<void> {
+    voteValue: VoteType,
+  ): Promise<UpdateResult> {
     const user = await this.getUserById(userId);
     const targetUser = await this.getUserById(targetUserId);
 
@@ -88,9 +87,7 @@ export class UserRepository {
     newVote.targetUser = targetUser;
     newVote.voteValue = voteValue;
 
-    await validateEntity(newVote);
-
-    await this.saveVoteAndUpdateRating({
+    return await this.saveVoteAndUpdateRating({
       voteEntity: newVote,
       userId,
       targetUserId,
@@ -98,16 +95,15 @@ export class UserRepository {
     });
   }
 
-  public async updateVoteAndRating({
+  public async updateVote({
     existingVote,
     userId,
     targetUserId,
     voteValue,
-  }: IVoteUpdateParams): Promise<void> {
+  }: IVoteUpdateParams): Promise<UpdateResult> {
     existingVote.voteValue = voteValue;
-    await validateEntity(existingVote);
 
-    await this.saveVoteAndUpdateRating({
+    return await this.saveVoteAndUpdateRating({
       voteEntity: existingVote,
       userId,
       targetUserId,
@@ -120,14 +116,19 @@ export class UserRepository {
     userId,
     targetUserId,
     voteValue,
-  }: IVoteSaveParams) {
-    await this.dataSource.manager.transaction(
+  }: IVoteSaveParams): Promise<UpdateResult> {
+    return await this.dataSource.manager.transaction(
       async transactionalEntityManager => {
-        await transactionalEntityManager.save(voteEntity);
+        if (voteValue === 0) {
+          await transactionalEntityManager.remove(voteEntity);
+        } else {
+          await transactionalEntityManager.save(voteEntity);
+        }
 
         const rating = await this.countRating(userId, targetUserId, voteValue);
-
-        await transactionalEntityManager.update(User, targetUserId, { rating });
+        return await transactionalEntityManager.update(User, targetUserId, {
+          rating,
+        });
       },
     );
   }
@@ -135,7 +136,7 @@ export class UserRepository {
   private async countRating(
     userId: string,
     targetUserId: string,
-    voteValue: number,
+    voteValue: VoteType,
   ) {
     const sumWithoutUserVote = await this.voteRepository.sum('voteValue', {
       targetUser: {

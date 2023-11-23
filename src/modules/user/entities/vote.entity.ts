@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { User } from './user.entity';
-import { VoteValues } from '@common/types';
+import { VoteType, VoteValues } from '../types';
 
 @Entity({ name: 'votes' })
 export class Vote {
@@ -26,5 +26,5 @@ export class Vote {
   })
   @Type(() => Number)
   @IsIn(VoteValues)
-  voteValue: number;
+  voteValue: VoteType;
 }

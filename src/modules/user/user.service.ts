@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -16,6 +17,7 @@ import { CreateUserDto } from '@modules/auth/dto';
 import { EditUserDto } from './dto';
 import { Role, RoleType } from '@common/types';
 import { S3Service } from './s3.service';
+import { VoteType } from './types';
 
 @Injectable()
 export class UserService {
@@ -92,7 +94,7 @@ export class UserService {
   public async vote(
     userId: string,
     targetUserId: string,
-    voteValue: number,
+    voteValue: VoteType,
   ): Promise<void> {
     if (userId === targetUserId) {
       throw new BadRequestException('You cannot give the vote for yourself');
@@ -104,11 +106,20 @@ export class UserService {
     );
 
     if (!existingVote) {
-      await this.userRepository.createVoteAndCount(
+      if (voteValue === 0) {
+        throw new BadRequestException('The vote does not exist');
+      }
+
+      const updateResult = await this.userRepository.createVote(
         userId,
         targetUserId,
         voteValue,
       );
+
+      if (!updateResult.affected) {
+        throw new InternalServerErrorException(`Rating wasn't updated`);
+      }
+
       return;
     }
 
@@ -116,12 +127,16 @@ export class UserService {
       throw new BadRequestException('You have already voted for this user');
     }
 
-    await this.userRepository.updateVoteAndRating({
+    const updateResult = await this.userRepository.updateVote({
       existingVote,
       userId,
       targetUserId,
       voteValue,
     });
+
+    if (!updateResult.affected) {
+      throw new InternalServerErrorException(`Rating wasn't updated`);
+    }
   }
 
   public async uploadAvatar(
