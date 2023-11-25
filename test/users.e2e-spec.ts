@@ -4,56 +4,38 @@ import { v4 as uuidv4 } from 'uuid';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 
 import { AppModule } from '@modules/app.module';
-import { User } from '@modules/user/entities';
 import { UserService } from '@modules/user/user.service';
+import { TestApi } from './api/test-api';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
   let usersService: UserService;
+  const testApi = TestApi.getInstance();
 
-  const uuidSplit = uuidv4().slice(0, 15);
+  let user: request.Response | null;
+  let secondUser: request.Response | null;
+
+  const uuidSplit = () => uuidv4().slice(0, 10);
 
   const createUserDtoWithoutPassword = {
-    nickname: `test_${uuidSplit}`,
-    firstName: 'John',
-    lastName: 'Walsh',
+    nickname: `Test_${uuidSplit()}`,
+    firstName: 'Test',
+    lastName: 'Test',
   };
 
   const createUserDto = {
     ...createUserDtoWithoutPassword,
-    password: '12345',
+    password: uuidSplit(),
+  };
+
+  const secondUserDto = {
+    ...createUserDto,
+    nickname: createUserDto.nickname + '_',
   };
 
   const loginUserDto = {
     nickname: createUserDto.nickname,
     password: createUserDto.password,
-  };
-
-  let user: Partial<User>;
-  let secondUser: Partial<User>;
-  let token: string;
-  let lastModified: string;
-  let isCreatedCaseDone = false;
-  let isLoginCaseDone = false;
-
-  const createAndLoginSecondUser = async () => {
-    const newUser = await request(app.getHttpServer())
-      .post('/auth/signup/')
-      .send({
-        ...createUserDto,
-        nickname: createUserDto.nickname.replace('test_', 'test1'),
-      });
-
-    secondUser = newUser.body.user;
-
-    const loggedUser = await request(app.getHttpServer())
-      .post('/auth/login/')
-      .send({
-        nickname: newUser.body.user.nickname,
-        password: createUserDto.password,
-      });
-
-    return loggedUser.body.token;
   };
 
   beforeEach(async () => {
@@ -66,145 +48,164 @@ describe('Users (e2e)', () => {
     app.useGlobalPipes(new ValidationPipe());
     await app.init();
 
-    if (!isCreatedCaseDone) {
-      return;
-    }
-
-    user = (
-      await request(app.getHttpServer())
-        .post('/auth/signup/')
-        .send(createUserDto)
-    ).body.user;
-
-    if (!isLoginCaseDone) {
-      return;
-    }
-
-    const loggedUser = await request(app.getHttpServer())
-      .post('/auth/login/')
-      .send(loginUserDto);
-
-    token = loggedUser.body.token;
-    lastModified = loggedUser.headers['last-modified'];
+    testApi.app = app;
   });
 
   afterEach(async () => {
-    if (user?.id) {
-      await usersService.deleteUser(user.id);
-      user = {};
+    const userId = user?.body.user.id;
+    if (userId) {
+      await usersService.deleteUser(userId);
+      user = null;
     }
 
-    if (secondUser?.id) {
-      await usersService.deleteUser(secondUser.id);
-      secondUser = {};
+    const secondUserId = secondUser?.body.user.id;
+
+    if (secondUserId) {
+      await usersService.deleteUser(secondUserId);
+      secondUser = null;
     }
 
     await app.close();
   });
 
-  it('/auth/signup/ (POST) 400 - fail (not unique nickname)', async () => {
-    user = (
-      await request(app.getHttpServer())
-        .post('/auth/signup/')
-        .send(createUserDto)
-    ).body.user;
+  it('/users/ (GET) 200 - success (users array received)', async () => {
+    const users = await testApi.getUsers().expect(200);
+    expect(Array.isArray(users.body.users)).toBeTruthy();
+  });
 
-    await request(app.getHttpServer())
-      .post('/auth/signup/')
-      .send(createUserDto)
-      .expect(400);
+  it('/auth/signup/ (POST) 400 - fail (not unique nickname)', async () => {
+    user = await testApi.createUser(createUserDto);
+    await testApi.createUser(createUserDto).expect(400);
   });
 
   it('/auth/signup/ (POST) 400 - fail (password is absent)', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/signup/')
-      .send(createUserDtoWithoutPassword)
-      .expect(400);
+    await testApi.createUser(createUserDtoWithoutPassword).expect(400);
   });
 
   it('/auth/signup/ (POST) 201 - success', async () => {
-    const newUser = await request(app.getHttpServer())
-      .post('/auth/signup/')
-      .send(createUserDto)
-      .expect(201);
-    user = newUser.body.user;
-    isCreatedCaseDone = true;
+    user = await testApi.createUser(createUserDto).expect(201);
   });
 
   it('/auth/login/ (POST) 400 - fail (password is not correct)', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/login/')
-      .send({ ...loginUserDto, password: loginUserDto.password + '_' })
+    user = await testApi.createUser(createUserDto);
+
+    await testApi
+      .login({
+        ...loginUserDto,
+        password: loginUserDto.password + '_',
+      })
       .expect(400);
   });
 
   it('/auth/login/ (POST) 200 - success', async () => {
-    const result = await request(app.getHttpServer())
-      .post('/auth/login/')
-      .send(loginUserDto)
-      .expect(200);
-    expect(result.body.token).toBeTruthy();
-    isLoginCaseDone = true;
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto).expect(200);
+    expect(loggedUser.body.token).toBeTruthy();
   });
 
   it(`/users/:id/ (PATCH) 403 - fail (user's attempt to change another user)`, async () => {
-    const tokenForSecondUser = await createAndLoginSecondUser();
+    user = await testApi.createUser(createUserDto);
+    secondUser = await testApi.createUser(secondUserDto);
 
-    await request(app.getHttpServer())
-      .patch(`/users/${user.id}`)
-      .send({ firstName: createUserDto.firstName + '_' })
-      .set('If-unmodified-since', lastModified)
-      .set('Authorization', `Bearer ${tokenForSecondUser}`)
+    const loggedUser = await testApi.login(loginUserDto);
+    const token = loggedUser.body.token;
+
+    const lastModified = secondUser.headers['last-modified'];
+    const userId = secondUser.body.user.id;
+
+    await testApi
+      .editUser({
+        userId,
+        editUserDto: { firstName: createUserDto.firstName + '_' },
+        lastModified,
+        token: token,
+      })
       .expect(403);
   });
 
-  it('/user/:id/ (PATCH) 404 - fail (user is not found)', async () => {
-    await request(app.getHttpServer())
-      .patch(`/users/${uuidv4()}`)
-      .send({ firstName: createUserDto.firstName + '_' })
-      .set('If-unmodified-since', lastModified)
-      .set('Authorization', `Bearer ${token}`)
+  it('/users/:id/ (PATCH) 404 - fail (user is not found)', async () => {
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto);
+
+    const token = loggedUser.body.token;
+    const lastModified = user.headers['last-modified'];
+
+    await testApi
+      .editUser({
+        userId: uuidv4(),
+        editUserDto: { firstName: createUserDto.firstName + '_' },
+        lastModified,
+        token: token,
+      })
       .expect(404);
   });
 
   it(`/users/:id/ (PATCH) 403 - fail (user is trying to change role)`, async () => {
-    await request(app.getHttpServer())
-      .patch(`/users/${user.id}`)
-      .send({ role: 'moderator' })
-      .set('If-unmodified-since', lastModified)
-      .set('Authorization', `Bearer ${token}`)
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto);
+
+    const token = loggedUser.body.token;
+    const lastModified = user.headers['last-modified'];
+
+    await testApi
+      .editUser({
+        userId: loggedUser.body.user.id,
+        editUserDto: { role: 'moderator' },
+        lastModified,
+        token: token,
+      })
       .expect(403);
   });
 
-  it('/user/:id/ (PATCH) 200 - success (first name is changed)', async () => {
-    await request(app.getHttpServer())
-      .patch(`/users/${user.id}`)
-      .send({ firstName: createUserDto.firstName + '_' })
-      .set('If-unmodified-since', lastModified)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(200);
+  it('/users/:id/ (PATCH) 200 - success (first name is changed)', async () => {
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto);
+
+    const token = loggedUser.body.token;
+    const lastModified = user.headers['last-modified'];
+    const userId = loggedUser.body.user.id;
+
+    await testApi.editUser({
+      userId,
+      editUserDto: { firstName: createUserDto.firstName + '_' },
+      lastModified,
+      token,
+    });
+
+    const changedFirsName = (await testApi.getUserById(userId)).body.user
+      .firstName;
+
+    expect(changedFirsName).not.toBe(createUserDto.nickname);
   });
 
-  it('/user/:id (DELETE) 404 - fail (user is not found)', async () => {
-    await request(app.getHttpServer())
-      .delete(`/users/${uuidv4()}`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(404);
+  it('/users/:id (DELETE) 404 - fail (user is not found)', async () => {
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto);
+    const token = loggedUser.body.token;
+
+    await testApi.deleteUser(uuidv4(), token).expect(404);
   });
 
-  it('/user/:id (DELETE) 403 - fail (user is trying delete another user)', async () => {
-    const tokenForSecondUser = await createAndLoginSecondUser();
+  it('/users/:id (DELETE) 403 - fail (user is trying delete another user)', async () => {
+    user = await testApi.createUser(createUserDto);
+    secondUser = await testApi.createUser(secondUserDto);
 
-    await request(app.getHttpServer())
-      .delete(`/users/${user.id}`)
-      .set('Authorization', `Bearer ${tokenForSecondUser}`)
-      .expect(403);
+    const loggedUser = await testApi.login(loginUserDto);
+
+    const token = loggedUser.body.token;
+    const secondUserId = secondUser.body.user.id;
+
+    await testApi.deleteUser(secondUserId, token).expect(403);
   });
 
-  it('/user/:id (DELETE) 204', async () => {
-    await request(app.getHttpServer())
-      .delete(`/users/${user.id}`)
-      .set('Authorization', `Bearer ${token}`)
-      .expect(204);
+  it('/users/:id (DELETE) 204 - success (user is deleted)', async () => {
+    user = await testApi.createUser(createUserDto);
+    const loggedUser = await testApi.login(loginUserDto);
+
+    const token = loggedUser.body.token;
+    const userId = loggedUser.body.user.id;
+
+    await testApi.deleteUser(userId, token).expect(204);
+    await testApi.getUserById(userId).expect(404);
   });
 });

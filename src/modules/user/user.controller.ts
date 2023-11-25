@@ -85,10 +85,6 @@ export class UserController {
   ) {
     const user = await this.userService.getUserById(id);
 
-    if (!user) {
-      throw new NotFoundException('User is not found');
-    }
-
     res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
       user: mapUserOutput(user),
