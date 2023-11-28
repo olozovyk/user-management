@@ -30,8 +30,10 @@ export class ProtectUserChangesGuard implements CanActivate {
       request.get('If-unmodified-since'),
     ).setMilliseconds(0);
 
-    if (updatedAtTimestamp > ifUnmodifiedSinceTimestamp) {
-      throw new BadRequestException('The user information is not up to date');
+    if (updatedAtTimestamp !== ifUnmodifiedSinceTimestamp) {
+      throw new BadRequestException(
+        'The user information is not up to date. Set correct last-modified header',
+      );
     }
 
     return true;

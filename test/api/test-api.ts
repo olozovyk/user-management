@@ -3,9 +3,16 @@ import { CreateUserDto, LoginDto } from '@modules/auth/dto';
 import * as request from 'supertest';
 import { RoleType } from '@common/types';
 
-interface IEditUserParam {
+interface IEditUserParams {
   userId: string;
   editUserDto: Partial<CreateUserDto & { role: RoleType }>;
+  lastModified: string;
+  token: string;
+}
+
+interface IVoteParams {
+  targetUserId: string;
+  voteValue: unknown; // unknown is to check for unacceptable values
   lastModified: string;
   token: string;
 }
@@ -50,7 +57,7 @@ export class TestApi {
     editUserDto,
     lastModified,
     token,
-  }: IEditUserParam): request.Test {
+  }: IEditUserParams): request.Test {
     return request(this._app.getHttpServer())
       .patch(`/users/${userId}`)
       .send(editUserDto)
@@ -61,6 +68,19 @@ export class TestApi {
   public deleteUser(userId: string, token: string): request.Test {
     return request(this._app.getHttpServer())
       .delete(`/users/${userId}`)
+      .set('Authorization', `Bearer ${token}`);
+  }
+
+  public vote({
+    targetUserId,
+    voteValue,
+    lastModified,
+    token,
+  }: IVoteParams): request.Test {
+    return request(this._app.getHttpServer())
+      .post(`/users/${targetUserId}/rating`)
+      .send({ vote: voteValue })
+      .set('If-unmodified-since', lastModified)
       .set('Authorization', `Bearer ${token}`);
   }
 }
