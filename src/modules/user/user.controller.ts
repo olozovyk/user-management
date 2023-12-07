@@ -32,6 +32,7 @@ import {
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -47,20 +48,23 @@ import { mapUserOutput } from '@common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
 import { ITokenPayload, IUser } from '@common/types';
 import {
-  GetAllUsersResDto,
-  GetUserResDto,
-  FileUploadDto,
-  AvatarResDto,
-} from '@common/dto/openApi';
+  AvatarApiDto,
+  FileUploadApiDto,
+  GetAllUsersApiDto,
+  GetUserApiDto,
+} from '@modules/user/dto/api';
 
 @Controller('users')
+@ApiTags('user')
 @UseGuards(UserExistingGuard)
-@ApiTags('Users')
 export class UserController {
   constructor(private userService: UserService) {}
 
+  /*
+   * Get all users
+   * */
   @Get()
-  @ApiOkResponse({ type: GetAllUsersResDto })
+  @ApiOkResponse({ type: GetAllUsersApiDto })
   public async getUsers(
     @Query() query: QueryPaginationDto,
   ): Promise<{ users: IUser[] }> {
@@ -76,9 +80,12 @@ export class UserController {
     };
   }
 
+  /*
+   * Get user by ID
+   * */
   @Get(':id')
-  @ApiOkResponse({ type: GetUserResDto })
-  @ApiNotFoundResponse({ description: 'User is not found' })
+  @ApiOkResponse({ type: GetUserApiDto })
+  @ApiNotFoundResponse({ description: 'Not found' })
   public async getUserById(
     @Param('id') id: string,
     @Res() res: Response<{ user: IUser }>,
@@ -91,6 +98,9 @@ export class UserController {
     });
   }
 
+  /*
+   * Edit user
+   * */
   @Patch(':id')
   @ApiBearerAuth()
   @ApiHeader({
@@ -98,13 +108,11 @@ export class UserController {
     description: 'Last modified date',
     required: true,
   })
-  @ApiOkResponse({ description: 'An updated user', type: GetUserResDto })
-  @ApiNotFoundResponse({ description: 'User is not found' })
+  @ApiOkResponse({ description: 'An updated user', type: GetUserApiDto })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @ApiBadRequestResponse({
-    description: 'The user information is not up to date',
-  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
   public async editUser(
     @Param('id') id: string,
@@ -128,10 +136,13 @@ export class UserController {
     });
   }
 
+  /*
+   * Delete user
+   * */
   @Delete(':id')
   @ApiBearerAuth()
-  @ApiNoContentResponse({ description: 'A user is deleted' })
-  @ApiNotFoundResponse({ description: 'User is not found' })
+  @ApiNoContentResponse({ description: 'User is deleted' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -140,6 +151,9 @@ export class UserController {
     await this.userService.softDeleteUser(id);
   }
 
+  /*
+   * Submit a vote for the user
+   * */
   @Post(':id/rating')
   @ApiBearerAuth()
   @ApiHeader({
@@ -147,12 +161,11 @@ export class UserController {
     description: 'Last modified date',
     required: true,
   })
+  @ApiParam({ name: 'id', description: 'User ID you vote for' })
   @ApiOkResponse({ description: 'The vote is counted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({
-    description:
-      'You cannot give the vote for yourself. You have already voted for this user.The user information is not up to date',
-  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @UseGuards(AuthGuard)
   @UseGuards(ProtectUserChangesGuard)
   @HttpCode(HttpStatus.OK)
@@ -169,6 +182,9 @@ export class UserController {
     };
   }
 
+  /*
+   * Download user avatar
+   * */
   @Post(':id/avatar')
   @ApiBearerAuth()
   @ApiHeader({
@@ -179,13 +195,12 @@ export class UserController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'jpeg, png, no large than 5MB',
-    type: FileUploadDto,
+    type: FileUploadApiDto,
   })
-  @ApiCreatedResponse({ type: AvatarResDto })
+  @ApiCreatedResponse({ type: AvatarApiDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiBadRequestResponse({
-    description: 'The user information is not up to date',
-  })
+  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiNotFoundResponse({ description: 'Not found' })
   @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(

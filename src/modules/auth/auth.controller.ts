@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
@@ -15,27 +16,31 @@ import { CreateUserDto, LoginDto } from './dto';
 import { IUser } from '@common/types';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiOkResponse,
-  ApiOperation,
-  ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { GetUserResDto, LoginResDto } from '@common/dto/openApi';
+import { AuthGuard } from '@common/guards';
+import { RefreshApiDto, LoginApiDto } from '@modules/auth/dto/api';
+import { GetUserApiDto } from '@modules/user/dto/api';
 
 @Controller('auth')
-@ApiTags('Authentication')
+@ApiTags('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  /*
+   * Create a new user
+   * */
   @Post('signup')
   @ApiCreatedResponse({
     description: 'The User is created',
-    type: GetUserResDto,
+    type: GetUserApiDto,
   })
-  @ApiBadRequestResponse({ description: 'Such a nickname already in use.' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   public async signup(
     @Body() body: CreateUserDto,
     @Res() res: Response<{ user: IUser }>,
@@ -48,13 +53,15 @@ export class AuthController {
     });
   }
 
+  /*
+   * Login user
+   * */
   @Post('login')
-  @ApiResponse({
-    status: 200,
+  @ApiOkResponse({
     description: 'Successful login',
-    type: LoginResDto,
+    type: LoginApiDto,
   })
-  @ApiBadRequestResponse({ description: 'Login or password is not correct.' })
+  @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(HttpStatus.OK)
   public async login(
     @Body() body: LoginDto,
@@ -73,8 +80,14 @@ export class AuthController {
     });
   }
 
+  /*
+   * Logout user
+   * */
   @Post('logout')
+  @ApiBearerAuth()
   @ApiNoContentResponse({ description: 'Logout successful' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async logout(@Req() req: Request, @Res() res: Response) {
     await this.authService.deleteToken(req.cookies.token);
@@ -82,10 +95,12 @@ export class AuthController {
     res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
+  /*
+   * Refresh token pair
+   * */
   @Post('refresh')
-  @ApiOperation({ summary: 'Refreshes a token pair' })
-  @ApiOkResponse({ description: 'A token pair refreshed' })
-  @ApiUnauthorizedResponse({ description: 'Token is not valid' })
+  @ApiOkResponse({ description: 'A token pair refreshed', type: RefreshApiDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   public async refresh(
     @Req() req: Request,
