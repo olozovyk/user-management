@@ -18,8 +18,8 @@ You can familiarize with the API through
 [Swagger](https://ec2-52-58-90-89.eu-central-1.compute.amazonaws.com/um/api/docs).
 
 To run the project locally, first install npm dependencies using the npm install
-command and set environment variables in the ```.env``` file. See the example in the
-```.env.example``` file.
+command and set environment variables in the `.env` file. See the example in the
+`.env.example` file.
 
 ### To run the project use one of the following commands:
 
@@ -29,8 +29,10 @@ $ npm start
 # in development mode
 $ npm run start:dev
 ```
-Base URL for local API deployment: ```localhost:PORT/um/api/``` Set the port value in your ```.env``` file and replace PORT 
-with the specified value before launching the API server.
+
+Base URL for local API deployment: `localhost:PORT/um/api/` Set the port value
+in your `.env` file and replace PORT with the specified value before launching
+the API server.
 
 ### The project consists of two main modules:
 
@@ -39,50 +41,4 @@ with the specified value before launching the API server.
 
 ### DB schema:
 
-User:
-
-```
-{
-	id: uuid,
-	nickname: string,
-	firstName: string,
-	lastName: string,
-	password: string,
-	role: 'user' | 'moderator' | 'admin',
-	rating: number,
-	createdAt: Date,
-	updatedAt: Date,
-	deletedAt: Date
-}
-```
-
-Token:
-
-```
-{
-	id: uuid,
-	token: string,
-	userId: User (many-to-one)
-}
-```
-
-Avatar:
-
-```
-{
-	id: uuid,
-	avatarUrl: string,
-	userId: User (many-to-one)
-}
-```
-
-Vote:
-
-```
-{
-	id: uuid,
-	userId: User (many-to-one),
-	targetUserId: User (many-to-one),
-	voteValue: number 
-}
-```
+<img alt="Entity relationship diagram" width="900" src="./readme/um-entities.png">
