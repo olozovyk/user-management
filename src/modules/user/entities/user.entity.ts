@@ -27,7 +27,7 @@ export class User {
   @Column({ length: 20 })
   lastName: string;
 
-  @Column()
+  @Column({ length: 20 })
   password: string;
 
   @Column({

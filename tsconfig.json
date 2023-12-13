@@ -21,5 +21,8 @@
       "@modules/*": ["./src/modules/*"],
       "@common/*": ["./src/common/*"]
     }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
   }
 }
