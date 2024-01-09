@@ -32,7 +32,7 @@ export class ProtectUserChangesGuard implements CanActivate {
 
     if (updatedAtTimestamp !== ifUnmodifiedSinceTimestamp) {
       throw new BadRequestException(
-        'The user information is not up to date. Set correct last-modified header',
+        'The user information is not up to date. Set correct "If-unmodified-since" header',
       );
     }
 

@@ -214,7 +214,7 @@ describe('Users (e2e)', () => {
       })
       .expect(400);
     expect(res.body.message).toBe(
-      'The user information is not up to date. Set correct last-modified header',
+      'The user information is not up to date. Set correct "If-unmodified-since" header',
     );
   });
 
