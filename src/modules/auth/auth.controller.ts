@@ -23,14 +23,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@common/guards';
+import { AuthGuard } from './guards';
 import { RefreshApiDto, LoginApiDto } from '@modules/auth/dto/api';
 import { GetUserApiDto } from '@modules/user/dto/api';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   /*
    * Create a new user

@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -40,8 +41,14 @@ export class UserService {
     return this.userRepository.getUserByNickname(nickname);
   }
 
-  public getUserById(id: string): Promise<User> {
-    return this.userRepository.getUserById(id);
+  public async getUserById(id: string): Promise<User> {
+    const user = await this.userRepository.getUserById(id);
+
+    if (!user) {
+      throw new NotFoundException('User is not found');
+    }
+
+    return user;
   }
 
   public async editUser(
@@ -80,7 +87,13 @@ export class UserService {
     }
 
     await this.userRepository.editUser(id, userToEdit);
-    return this.userRepository.getUserById(id);
+    const updatedUser = await this.userRepository.getUserById(id);
+
+    if (!updatedUser) {
+      throw new NotFoundException('User is not found');
+    }
+
+    return updatedUser;
   }
 
   public async softDeleteUser(id: string) {

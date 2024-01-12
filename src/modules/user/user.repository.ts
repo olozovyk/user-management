@@ -36,17 +36,11 @@ export class UserRepository {
     });
   }
 
-  public async getUserById(id: string): Promise<User> {
-    const user = await this.userRepository.findOne({
+  public getUserById(id: string): Promise<User | null> {
+    return this.userRepository.findOne({
       where: { id },
       relations: { avatar: true },
     });
-
-    if (!user) {
-      throw new NotFoundException('User is not found');
-    }
-
-    return user;
   }
 
   public editUser(
@@ -81,6 +75,10 @@ export class UserRepository {
   ): Promise<UpdateResult> {
     const user = await this.getUserById(userId);
     const targetUser = await this.getUserById(targetUserId);
+
+    if (!user || !targetUser) {
+      throw new NotFoundException('User is not found');
+    }
 
     const newVote = new Vote();
     newVote.user = user;
@@ -152,7 +150,13 @@ export class UserRepository {
 
   public async saveAvatarUrl(userId: string, avatarUrl: string): Promise<void> {
     const newAvatar = new Avatar();
-    newAvatar.user = await this.getUserById(userId);
+    const user = await this.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User is not found');
+    }
+
+    newAvatar.user = user;
     newAvatar.avatarUrl = avatarUrl;
 
     await this.avatarRepository.upsert(newAvatar, ['user']);

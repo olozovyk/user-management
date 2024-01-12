@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { Role } from '../types';
+import { Role } from '@common/types';
 
 @Injectable()
 export class PermissionToChangeGuard implements CanActivate {

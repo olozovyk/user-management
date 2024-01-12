@@ -38,12 +38,13 @@ import {
 } from '@nestjs/swagger';
 
 import { UserService } from './user.service';
+import { AuthGuard } from '@modules/auth/guards';
 import {
-  AuthGuard,
   PermissionToChangeGuard,
   ProtectUserChangesGuard,
   UserExistingGuard,
-} from '@common/guards';
+} from './guards';
+
 import { mapUserOutput } from '@common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
 import { ITokenPayload, IUser } from '@common/types';
@@ -56,7 +57,6 @@ import {
 
 @Controller('users')
 @ApiTags('user')
-@UseGuards(UserExistingGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -86,6 +86,7 @@ export class UserController {
   @Get(':id')
   @ApiOkResponse({ type: GetUserApiDto })
   @ApiNotFoundResponse({ description: 'Not found' })
+  @UseGuards(UserExistingGuard)
   public async getUserById(
     @Param('id') id: string,
     @Res() res: Response<{ user: IUser }>,
@@ -113,7 +114,12 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
+  @UseGuards(
+    AuthGuard,
+    UserExistingGuard,
+    PermissionToChangeGuard,
+    ProtectUserChangesGuard,
+  )
   public async editUser(
     @Param('id') id: string,
     @Body() body: EditUserDto,
@@ -146,7 +152,7 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(AuthGuard, PermissionToChangeGuard)
+  @UseGuards(AuthGuard, UserExistingGuard, PermissionToChangeGuard)
   public async deleteUser(@Param('id') id: string) {
     await this.userService.softDeleteUser(id);
   }
@@ -166,8 +172,7 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(AuthGuard)
-  @UseGuards(ProtectUserChangesGuard)
+  @UseGuards(AuthGuard, UserExistingGuard, ProtectUserChangesGuard)
   @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
@@ -201,7 +206,12 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(AuthGuard, PermissionToChangeGuard, ProtectUserChangesGuard)
+  @UseGuards(
+    AuthGuard,
+    UserExistingGuard,
+    PermissionToChangeGuard,
+    ProtectUserChangesGuard,
+  )
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(
     @Param('id') id: string,
