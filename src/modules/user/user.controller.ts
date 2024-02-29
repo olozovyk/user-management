@@ -188,7 +188,7 @@ export class UserController {
   }
 
   /*
-   * Download user avatar
+   * Upload user avatar
    * */
   @Post(':id/avatar')
   @ApiBearerAuth()
