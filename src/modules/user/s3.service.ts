@@ -6,13 +6,7 @@ import { ConfigService } from '@nestjs/config';
 export class S3Service {
   constructor(private configService: ConfigService) {}
 
-  private client = new S3Client({
-    region: this.configService.getOrThrow('REGION'),
-    credentials: {
-      accessKeyId: this.configService.getOrThrow('AWS_ID'),
-      secretAccessKey: this.configService.getOrThrow('AWS_KEY'),
-    },
-  });
+  private client = new S3Client({});
 
   public async sendFile(file: Buffer, key: string): Promise<void> {
     const input = {
