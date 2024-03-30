@@ -18,6 +18,12 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ unique: true, length: 30 })
+  email: string;
+
+  @Column({ default: false })
+  verifiedEmail: boolean;
+
   @Column({ unique: true, length: 20 })
   nickname: string;
 

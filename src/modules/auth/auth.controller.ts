@@ -108,9 +108,8 @@ export class AuthController {
   ) {
     const oldToken = req.cookies.token;
 
-    const { accessToken, refreshToken } = await this.authService.refreshToken(
-      oldToken,
-    );
+    const { accessToken, refreshToken } =
+      await this.authService.refreshToken(oldToken);
 
     res.cookie('token', refreshToken, { httpOnly: true });
     res.json({
