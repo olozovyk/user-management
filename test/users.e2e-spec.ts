@@ -19,6 +19,7 @@ describe('Users (e2e)', () => {
   const uuidSplit = () => uuidv4().slice(0, 10);
 
   const createUserDtoWithoutPassword = {
+    email: `${uuidSplit()}@some.com`,
     nickname: `Test_${uuidSplit()}`,
     firstName: 'Test',
     lastName: 'Test',
@@ -31,6 +32,7 @@ describe('Users (e2e)', () => {
 
   const secondUserDto = {
     ...createUserDto,
+    email: createUserDto.email + '.second',
     nickname: createUserDto.nickname + '_',
   };
 
@@ -113,7 +115,7 @@ describe('Users (e2e)', () => {
     expect(loggedUser.body.token).toBeTruthy();
   });
 
-  it(`/users/:id/ (PATCH) 403 - fail (user's attempt to change another user)`, async () => {
+  it(`/users/:id/ (PATCH) 403 - fail (user attempts to change another user)`, async () => {
     user = await testApi.createUser(createUserDto);
     secondUser = await testApi.createUser(secondUserDto);
 
@@ -188,7 +190,7 @@ describe('Users (e2e)', () => {
     expect(changedFirsName).not.toBe(createUserDto.nickname);
   });
 
-  it('/users/:id/ (PATCH) 400 - fail (The user information is not up to date)', async () => {
+  it('/users/:id/ (PATCH) 400 - fail (the user information is not up to date)', async () => {
     user = await testApi.createUser(createUserDto);
     const loggedUser = await testApi.login(loginUserDto);
 
@@ -269,7 +271,7 @@ describe('Users (e2e)', () => {
     expect(updatedRating).toBe(1);
   });
 
-  it('/users/:id/rating (POST) 400 - fail (Unacceptable value)', async () => {
+  it('/users/:id/rating (POST) 400 - fail (an unacceptable value)', async () => {
     user = await testApi.createUser(createUserDto);
     secondUser = await testApi.createUser(secondUserDto);
 
@@ -286,7 +288,7 @@ describe('Users (e2e)', () => {
     expect(res.body.message).toEqual(['Accepted value are 1, 0, -1']);
   });
 
-  it('/users/:id/rating (POST) 400 - fail (This user has already voted)', async () => {
+  it('/users/:id/rating (POST) 400 - fail (user has already voted)', async () => {
     user = await testApi.createUser(createUserDto);
     secondUser = await testApi.createUser(secondUserDto);
 
