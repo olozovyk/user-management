@@ -8,10 +8,11 @@ import { AuthRepository } from './auth.repository';
 import { UserModule } from '@modules/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Token } from '@modules/auth/entities';
+import { EmailService } from './email.service';
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService, AuthRepository],
+  providers: [AuthService, AuthRepository, EmailService],
   imports: [
     ConfigModule,
     UserModule,

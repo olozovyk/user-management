@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserService } from './user.service';
 import { UserRepository } from './user.repository';
 import { UserController } from './user.controller';
 import { S3Service } from './s3.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { Avatar, User, Vote } from '@modules/user/entities';
 
 @Module({

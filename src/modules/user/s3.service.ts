@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class S3Service {
-  constructor(private configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {}
+
+  private readonly logger = new Logger(S3Service.name);
 
   private client = new S3Client({});
 
@@ -16,6 +18,10 @@ export class S3Service {
     };
     const command = new PutObjectCommand(input);
 
-    await this.client.send(command);
+    try {
+      await this.client.send(command);
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
