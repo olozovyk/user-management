@@ -35,9 +35,9 @@ import { GetUserApiDto } from '@modules/user/dto/api';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /*
+  /**
    * Create a new user
-   * */
+   */
   @Post('signup')
   @ApiCreatedResponse({
     description: 'The User is created',
@@ -56,9 +56,9 @@ export class AuthController {
     });
   }
 
-  /*
+  /**
    * Login user
-   * */
+   */
   @Post('login')
   @ApiOkResponse({
     description: 'Successful login',
@@ -83,9 +83,9 @@ export class AuthController {
     });
   }
 
-  /*
+  /**
    * Logout user
-   * */
+   */
   @Post('logout')
   @ApiBearerAuth()
   @ApiNoContentResponse({ description: 'Logout successful' })
@@ -98,9 +98,9 @@ export class AuthController {
     res.sendStatus(HttpStatus.NO_CONTENT);
   }
 
-  /*
+  /**
    * Refresh token pair
-   * */
+   */
   @Post('refresh')
   @ApiOkResponse({ description: 'A token pair refreshed', type: RefreshApiDto })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
