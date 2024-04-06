@@ -7,6 +7,7 @@ export interface ITokens {
 
 export interface ITokenPayload {
   id: string;
+  email: string;
   nickname: string;
   role: RoleType;
 }

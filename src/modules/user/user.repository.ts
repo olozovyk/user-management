@@ -17,6 +17,16 @@ export class UserRepository {
     private readonly avatarRepository: Repository<Avatar>,
   ) {}
 
+  public saveEmailVerificationToken(
+    userId: string,
+    token: string,
+  ): Promise<UpdateResult> {
+    return this.userRepository.update(
+      { id: userId },
+      { emailVerificationToken: token },
+    );
+  }
+
   public getUsers(limit: number, skip: number): Promise<User[]> {
     return this.userRepository.find({
       take: limit,

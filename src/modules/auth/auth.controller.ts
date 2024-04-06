@@ -4,6 +4,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   Post,
   Req,
   Res,
@@ -13,11 +14,13 @@ import {
 import { AuthService } from './auth.service';
 import { mapUserOutput } from '@common/utils';
 import { CreateUserDto, LoginDto } from './dto';
-import { IUser } from '@common/types';
+import { ITokenPayload, IUser } from '@common/types';
+import { User } from '@common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiTags,
@@ -115,5 +118,30 @@ export class AuthController {
     res.json({
       token: accessToken,
     });
+  }
+
+  /**
+   * Send a link to verify email
+   */
+  @Post('send-verification-link')
+  @ApiOkResponse({ description: 'A verification link has been sent' })
+  @ApiInternalServerErrorResponse({
+    description: 'A verification link has not been sent',
+  })
+  @UseGuards(AuthGuard)
+  @HttpCode(HttpStatus.OK)
+  public async sendEmailWithVerificationLink(@User() user: ITokenPayload) {
+    const result = await this.authService.sendVerificationEmail(
+      user.id,
+      user.email,
+    );
+
+    if (!result) {
+      throw new InternalServerErrorException(
+        'A verification link has not been sent',
+      );
+    }
+
+    return { message: 'A verification link has been sent' };
   }
 }

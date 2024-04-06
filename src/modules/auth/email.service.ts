@@ -35,11 +35,7 @@ export class EmailService {
       },
     } satisfies SendEmailCommandInput;
 
-    try {
-      const command = new SendEmailCommand(input);
-      return this.client.send(command);
-    } catch (e) {
-      this.logger.error(e);
-    }
+    const command = new SendEmailCommand(input);
+    return this.client.send(command);
   }
 }

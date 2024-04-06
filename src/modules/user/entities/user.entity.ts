@@ -24,6 +24,9 @@ export class User {
   @Column({ default: false })
   verifiedEmail: boolean;
 
+  @Column({ type: 'uuid', unique: true, nullable: true })
+  emailVerificationToken: string;
+
   @Column({ unique: true, length: 20 })
   nickname: string;
 

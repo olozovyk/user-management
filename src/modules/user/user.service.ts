@@ -28,6 +28,10 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
+  public saveEmailVerificationToken(userId: string, token: string) {
+    return this.userRepository.saveEmailVerificationToken(userId, token);
+  }
+
   public getUsers(limit: number, page: number): Promise<User[]> {
     const skip = getSkipForPagination(limit, page);
     return this.userRepository.getUsers(limit, skip);
