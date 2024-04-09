@@ -1,4 +1,4 @@
-import { RoleType } from './roles';
+import { RoleType } from '@modules/user/types';
 
 export interface ITokens {
   accessToken: string;

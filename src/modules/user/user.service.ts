@@ -16,9 +16,8 @@ import {
 import { User } from './entities';
 import { CreateUserDto } from '@modules/auth/dto';
 import { EditUserDto } from './dto';
-import { Role, RoleType } from '@common/types';
 import { S3Service } from './s3.service';
-import { VoteType } from './types';
+import { Role, RoleType, VoteType } from './types';
 
 @Injectable()
 export class UserService {

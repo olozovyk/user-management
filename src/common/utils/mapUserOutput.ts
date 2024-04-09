@@ -1,5 +1,5 @@
 import { User } from '@modules/user/entities';
-import { IUser } from '../types';
+import { IUser } from '@modules/user/types';
 
 export const mapUserOutput = (user: User): IUser => {
   const {

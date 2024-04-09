@@ -10,12 +10,12 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
-import { ITokenPayload, ITokens } from 'src/common/types';
 import { UserService } from '@modules/user/user.service';
 import { CreateUserDto, LoginDto } from './dto';
 import { createHash } from '@common/utils';
 import { User } from '@modules/user/entities';
 import { EmailService } from './email.service';
+import { ITokenPayload, ITokens } from './types';
 
 @Injectable()
 export class AuthService {

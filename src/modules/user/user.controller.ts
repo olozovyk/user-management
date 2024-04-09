@@ -47,13 +47,14 @@ import {
 
 import { mapUserOutput } from '@common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
-import { ITokenPayload, IUser } from '@common/types';
 import {
   AvatarApiDto,
   FileUploadApiDto,
   GetAllUsersApiDto,
   GetUserApiDto,
 } from '@modules/user/dto/api';
+import { IUser } from './types';
+import { ITokenPayload } from '@modules/auth/types';
 
 @Controller('users')
 @ApiTags('user')

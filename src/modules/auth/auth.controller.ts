@@ -14,7 +14,6 @@ import {
 import { AuthService } from './auth.service';
 import { mapUserOutput } from '@common/utils';
 import { CreateUserDto, LoginDto } from './dto';
-import { ITokenPayload, IUser } from '@common/types';
 import { User } from '@common/decorators';
 import {
   ApiBadRequestResponse,
@@ -29,6 +28,8 @@ import {
 import { AuthGuard } from './guards';
 import { RefreshApiDto, LoginApiDto } from '@modules/auth/dto/api';
 import { GetUserApiDto } from '@modules/user/dto/api';
+import { IUser } from '@modules/user/types';
+import { ITokenPayload } from './types';
 
 @Controller('auth')
 @ApiTags('auth')
