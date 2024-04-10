@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException,
@@ -165,6 +166,21 @@ export class AuthService {
     }
   }
 
+  public async getUserByEmailVerificationToken(
+    emailVerificationToken: string,
+  ): Promise<User> {
+    const user = await this.usersService.getUserByEmailVerificationToken(
+      emailVerificationToken,
+    );
+
+    if (!user) {
+      throw new BadRequestException('Provide a valid verification token');
+    }
+
+    return user;
+  }
+
+  // TODO: is it better to return void or throw error than boolean?
   public async sendVerificationEmail(
     userId: string,
     to: string,
@@ -177,9 +193,10 @@ export class AuthService {
     const token = randomUUID();
 
     try {
+      // TODO: check on update result affected
       await this.usersService.saveEmailVerificationToken(userId, token);
 
-      const path = `users/verify-email/${token}`;
+      const path = `auth/verify-email/${token}`;
 
       const message = `Please go to ${URL}${path} to verify your email. The link will be available within 24 hours`;
 
@@ -192,6 +209,16 @@ export class AuthService {
       return !!sentEmailResult;
     } catch (e) {
       return false;
+    }
+  }
+
+  public async setVerifiedEmail(userId: string): Promise<void> {
+    const updateResult = await this.usersService.setVerifiedEmail(userId);
+
+    if (updateResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'Failed to update email verification status in the database',
+      );
     }
   }
 }

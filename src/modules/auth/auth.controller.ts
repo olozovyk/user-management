@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Param,
   Post,
   Req,
   Res,
@@ -122,15 +124,28 @@ export class AuthController {
   }
 
   /**
+   * Verify email
+   */
+  @Get('verify-email/:token')
+  public async verifyEmail(@Param('token') token: string) {
+    const { id } =
+      await this.authService.getUserByEmailVerificationToken(token);
+
+    await this.authService.setVerifiedEmail(id);
+
+    // TODO: return static page with link to the client login page
+    return { message: 'The email successfully verified' };
+  }
+
+  /**
    * Send a link to verify email
    */
-  @Post('send-verification-link')
+  @Get('send-verification-link')
   @ApiOkResponse({ description: 'A verification link has been sent' })
   @ApiInternalServerErrorResponse({
     description: 'A verification link has not been sent',
   })
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.OK)
   public async sendEmailWithVerificationLink(@User() user: ITokenPayload) {
     const result = await this.authService.sendVerificationEmail(
       user.id,
