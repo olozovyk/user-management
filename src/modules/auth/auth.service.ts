@@ -180,11 +180,16 @@ export class AuthService {
     return user;
   }
 
-  // TODO: is it better to return void or throw error than boolean?
   public async sendVerificationEmail(
     userId: string,
     to: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
+    const user = await this.usersService.getUserById(userId);
+
+    if (user.verifiedEmail) {
+      throw new BadRequestException('The email is already verified');
+    }
+
     const URL =
       process.env.NODE_ENV === 'development'
         ? this.BASE_URL_LOCAL
@@ -192,23 +197,26 @@ export class AuthService {
 
     const token = randomUUID();
 
+    const updateResult = await this.usersService.saveEmailVerificationToken(
+      userId,
+      token,
+    );
+
+    if (updateResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'Failed to save email verification token in the database',
+      );
+    }
+
     try {
-      // TODO: check on update result affected
-      await this.usersService.saveEmailVerificationToken(userId, token);
-
       const path = `auth/verify-email/${token}`;
-
       const message = `Please go to ${URL}${path} to verify your email.`;
 
-      const sentEmailResult = await this.emailService.send(
-        this.EMAIL_SENDER,
-        to,
-        message,
-      );
-
-      return !!sentEmailResult;
+      await this.emailService.send(this.EMAIL_SENDER, to, message);
     } catch (e) {
-      return false;
+      throw new InternalServerErrorException(
+        'Failed to send verification email',
+      );
     }
   }
 

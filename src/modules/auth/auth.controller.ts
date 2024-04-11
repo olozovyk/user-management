@@ -5,7 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
+  Logger,
   Param,
   Post,
   Req,
@@ -39,6 +39,8 @@ import { ITokenPayload } from './types';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  private readonly logger = new Logger(AuthController.name);
+
   /**
    * Create a new user
    */
@@ -53,6 +55,12 @@ export class AuthController {
     @Res() res: Response<{ user: IUser }>,
   ) {
     const newUser = await this.authService.signup(body);
+
+    try {
+      await this.authService.sendVerificationEmail(newUser.id, newUser.email);
+    } catch (e) {
+      this.logger.error('Failed to send verification email');
+    }
 
     res.set('Last-Modified', newUser.updatedAt.toUTCString());
     res.json({
@@ -152,16 +160,7 @@ export class AuthController {
   })
   @UseGuards(AuthGuard)
   public async sendEmailWithVerificationLink(@User() user: ITokenPayload) {
-    const result = await this.authService.sendVerificationEmail(
-      user.id,
-      user.email,
-    );
-
-    if (!result) {
-      throw new InternalServerErrorException(
-        'A verification link has not been sent',
-      );
-    }
+    await this.authService.sendVerificationEmail(user.id, user.email);
 
     return { message: 'A verification link has been sent' };
   }
