@@ -198,7 +198,7 @@ export class AuthService {
 
       const path = `auth/verify-email/${token}`;
 
-      const message = `Please go to ${URL}${path} to verify your email. The link will be available within 24 hours`;
+      const message = `Please go to ${URL}${path} to verify your email.`;
 
       const sentEmailResult = await this.emailService.send(
         this.EMAIL_SENDER,

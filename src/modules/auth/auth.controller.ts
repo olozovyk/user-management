@@ -12,6 +12,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { join } from 'node:path';
 
 import { AuthService } from './auth.service';
 import { mapUserOutput } from '@common/utils';
@@ -127,14 +128,18 @@ export class AuthController {
    * Verify email
    */
   @Get('verify-email/:token')
-  public async verifyEmail(@Param('token') token: string) {
+  public async verifyEmail(
+    @Param('token') token: string,
+    @Res() res: Response,
+  ) {
     const { id } =
       await this.authService.getUserByEmailVerificationToken(token);
 
     await this.authService.setVerifiedEmail(id);
 
-    // TODO: return static page with link to the client login page
-    return { message: 'The email successfully verified' };
+    res.sendFile(
+      join(__dirname, '../../../static', 'verification-success.html'),
+    );
   }
 
   /**
