@@ -1,30 +1,38 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
-import { ITokenPayload, ITokens, RoleType } from 'src/common/types';
 import { UserService } from '@modules/user/user.service';
 import { CreateUserDto, LoginDto } from './dto';
 import { createHash } from '@common/utils';
 import { User } from '@modules/user/entities';
+import { EmailService } from './email.service';
+import { ITokenPayload, ITokens } from './types';
 
 @Injectable()
 export class AuthService {
   private logger = new Logger(AuthService.name);
 
   constructor(
-    private authRepository: AuthRepository,
-    private jwtService: JwtService,
-    private configService: ConfigService,
-    private usersService: UserService,
+    private readonly authRepository: AuthRepository,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly usersService: UserService,
+    private readonly emailService: EmailService,
   ) {}
+
+  private EMAIL_SENDER = this.configService.getOrThrow('EMAIL_SENDER');
+  private BASE_URL = this.configService.getOrThrow('BASE_URL');
+  private BASE_URL_LOCAL = this.configService.getOrThrow('BASE_URL_LOCAL');
 
   public async signup(user: CreateUserDto): Promise<User> {
     const password = createHash(user.password);
@@ -60,11 +68,12 @@ export class AuthService {
       throw new BadRequestException('Login or password is not correct');
     }
 
-    const tokens = await this.createTokens(
-      existingUser.id,
-      existingUser.nickname,
-      existingUser.role,
-    );
+    const tokens = await this.createTokens({
+      id: existingUser.id,
+      email: existingUser.email,
+      nickname: existingUser.nickname,
+      role: existingUser.role,
+    });
 
     await this.saveToken(tokens.refreshToken, existingUser.id);
 
@@ -84,15 +93,22 @@ export class AuthService {
 
     const payload = await this.decodeToken(oldToken);
 
-    if (!payload || !payload.id || !payload.nickname || !payload.role) {
+    if (
+      !payload ||
+      !payload.email ||
+      !payload.id ||
+      !payload.nickname ||
+      !payload.role
+    ) {
       throw new UnauthorizedException('Token is not valid');
     }
 
-    const { accessToken, refreshToken } = await this.createTokens(
-      payload.id,
-      payload.nickname,
-      payload.role,
-    );
+    const { accessToken, refreshToken } = await this.createTokens({
+      id: payload.id,
+      email: payload.email,
+      nickname: payload.nickname,
+      role: payload.role,
+    });
 
     const existingUser = await this.usersService.getUserById(payload.id);
 
@@ -108,23 +124,24 @@ export class AuthService {
     };
   }
 
-  private async createTokens(
-    id: string,
-    nickname: string,
-    role: RoleType,
-  ): Promise<ITokens> {
+  private async createTokens({
+    id,
+    email,
+    nickname,
+    role,
+  }: ITokenPayload): Promise<ITokens> {
     const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
     const accessTtl = this.configService.get('JWT_ACCESS_TTL');
     const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
     const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
 
     const accessToken = await this.jwtService.signAsync(
-      { id, nickname, role },
+      { id, email, nickname, role },
       { secret: accessSecret, expiresIn: accessTtl },
     );
 
     const refreshToken = await this.jwtService.signAsync(
-      { id, nickname, role },
+      { id, email, nickname, role },
       { secret: refreshSecret, expiresIn: refreshTtl },
     );
 
@@ -146,6 +163,70 @@ export class AuthService {
       return this.jwtService.decode(token) as ITokenPayload;
     } catch (e) {
       this.logger.error('Token is not valid');
+    }
+  }
+
+  public async getUserByEmailVerificationToken(
+    emailVerificationToken: string,
+  ): Promise<User> {
+    const user = await this.usersService.getUserByEmailVerificationToken(
+      emailVerificationToken,
+    );
+
+    if (!user) {
+      throw new BadRequestException('Provide a valid verification token');
+    }
+
+    return user;
+  }
+
+  public async sendVerificationEmail(
+    userId: string,
+    to: string,
+  ): Promise<void> {
+    const user = await this.usersService.getUserById(userId);
+
+    if (user.verifiedEmail) {
+      throw new BadRequestException('The email is already verified');
+    }
+
+    const URL =
+      process.env.NODE_ENV === 'development'
+        ? this.BASE_URL_LOCAL
+        : this.BASE_URL;
+
+    const token = randomUUID();
+
+    const updateResult = await this.usersService.saveEmailVerificationToken(
+      userId,
+      token,
+    );
+
+    if (updateResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'Failed to save email verification token in the database',
+      );
+    }
+
+    try {
+      const path = `auth/verify-email/${token}`;
+      const message = `Please go to ${URL}${path} to verify your email.`;
+
+      await this.emailService.send(this.EMAIL_SENDER, to, message);
+    } catch (e) {
+      throw new InternalServerErrorException(
+        'Failed to send verification email',
+      );
+    }
+  }
+
+  public async setVerifiedEmail(userId: string): Promise<void> {
+    const updateResult = await this.usersService.setVerifiedEmail(userId);
+
+    if (updateResult.affected === 0) {
+      throw new InternalServerErrorException(
+        'Failed to update email verification status in the database',
+      );
     }
   }
 }

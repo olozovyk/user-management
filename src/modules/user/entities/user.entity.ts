@@ -9,14 +9,23 @@ import {
   OneToOne,
 } from 'typeorm';
 import { Token } from '@modules/auth/entities';
-import { Role, RoleType } from '@common/types';
 import { Vote } from './vote.entity';
 import { Avatar } from './avatar.entity';
+import { Role, RoleType } from '../types';
 
 @Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ unique: true, length: 30 })
+  email: string;
+
+  @Column({ default: false })
+  verifiedEmail: boolean;
+
+  @Column({ type: 'uuid', unique: true, nullable: true })
+  emailVerificationToken: string | null;
 
   @Column({ unique: true, length: 20 })
   nickname: string;

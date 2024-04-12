@@ -17,6 +17,29 @@ export class UserRepository {
     private readonly avatarRepository: Repository<Avatar>,
   ) {}
 
+  public saveEmailVerificationToken(
+    userId: string,
+    token: string,
+  ): Promise<UpdateResult> {
+    return this.userRepository.update(
+      { id: userId },
+      { emailVerificationToken: token },
+    );
+  }
+
+  public getUserByEmailVerificationToken(
+    emailVerificationToken: string,
+  ): Promise<User | null> {
+    return this.userRepository.findOneBy({ emailVerificationToken });
+  }
+
+  public setVerifiedEmail(userId: string): Promise<UpdateResult> {
+    return this.userRepository.update(
+      { id: userId },
+      { verifiedEmail: true, emailVerificationToken: null },
+    );
+  }
+
   public getUsers(limit: number, skip: number): Promise<User[]> {
     return this.userRepository.find({
       take: limit,

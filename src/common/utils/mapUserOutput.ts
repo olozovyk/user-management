@@ -1,10 +1,22 @@
 import { User } from '@modules/user/entities';
-import { IUser } from '../types';
+import { IUser } from '@modules/user/types';
 
 export const mapUserOutput = (user: User): IUser => {
-  const { id, nickname, firstName, lastName, role, rating, avatar } = user;
+  const {
+    id,
+    email,
+    verifiedEmail,
+    nickname,
+    firstName,
+    lastName,
+    role,
+    rating,
+    avatar,
+  } = user;
   return {
     id,
+    email,
+    verifiedEmail,
     nickname,
     firstName,
     lastName,

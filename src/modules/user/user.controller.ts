@@ -47,22 +47,23 @@ import {
 
 import { mapUserOutput } from '@common/utils';
 import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
-import { ITokenPayload, IUser } from '@common/types';
 import {
   AvatarApiDto,
   FileUploadApiDto,
   GetAllUsersApiDto,
   GetUserApiDto,
 } from '@modules/user/dto/api';
+import { IUser } from './types';
+import { ITokenPayload } from '@modules/auth/types';
 
 @Controller('users')
 @ApiTags('user')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  /*
+  /**
    * Get all users
-   * */
+   */
   @Get()
   @ApiOkResponse({ type: GetAllUsersApiDto })
   public async getUsers(
@@ -80,9 +81,9 @@ export class UserController {
     };
   }
 
-  /*
+  /**
    * Get user by ID
-   * */
+   */
   @Get(':id')
   @ApiOkResponse({ type: GetUserApiDto })
   @ApiNotFoundResponse({ description: 'Not found' })
@@ -99,9 +100,9 @@ export class UserController {
     });
   }
 
-  /*
+  /**
    * Edit user
-   * */
+   */
   @Patch(':id')
   @ApiBearerAuth()
   @ApiHeader({
@@ -142,9 +143,9 @@ export class UserController {
     });
   }
 
-  /*
+  /**
    * Delete user
-   * */
+   */
   @Delete(':id')
   @ApiBearerAuth()
   @ApiNoContentResponse({ description: 'User is deleted' })
@@ -157,9 +158,9 @@ export class UserController {
     await this.userService.softDeleteUser(id);
   }
 
-  /*
+  /**
    * Submit a vote for the user
-   * */
+   */
   @Post(':id/rating')
   @ApiBearerAuth()
   @ApiHeader({
@@ -187,9 +188,9 @@ export class UserController {
     };
   }
 
-  /*
+  /**
    * Upload user avatar
-   * */
+   */
   @Post(':id/avatar')
   @ApiBearerAuth()
   @ApiHeader({

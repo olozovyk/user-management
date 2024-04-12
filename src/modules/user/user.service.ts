@@ -16,9 +16,9 @@ import {
 import { User } from './entities';
 import { CreateUserDto } from '@modules/auth/dto';
 import { EditUserDto } from './dto';
-import { Role, RoleType } from '@common/types';
 import { S3Service } from './s3.service';
-import { VoteType } from './types';
+import { Role, RoleType, VoteType } from './types';
+import { UpdateResult } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -27,6 +27,25 @@ export class UserService {
     private s3Service: S3Service,
     private configService: ConfigService,
   ) {}
+
+  public saveEmailVerificationToken(
+    userId: string,
+    token: string,
+  ): Promise<UpdateResult> {
+    return this.userRepository.saveEmailVerificationToken(userId, token);
+  }
+
+  public getUserByEmailVerificationToken(
+    emailVerificationToken: string,
+  ): Promise<User | null> {
+    return this.userRepository.getUserByEmailVerificationToken(
+      emailVerificationToken,
+    );
+  }
+
+  public setVerifiedEmail(userId: string): Promise<UpdateResult> {
+    return this.userRepository.setVerifiedEmail(userId);
+  }
 
   public getUsers(limit: number, page: number): Promise<User[]> {
     const skip = getSkipForPagination(limit, page);

@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString, Length } from 'class-validator';
-import { Role, RoleType } from '@common/types';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role, RoleType } from '../types';
 
 export class EditUserDto {
   @ApiProperty({ example: 'John', required: false })

@@ -1,4 +1,4 @@
-import { RoleType } from './roles';
+import { RoleType } from '@modules/user/types';
 
 export interface ITokens {
   accessToken: string;
@@ -7,6 +7,7 @@ export interface ITokens {
 
 export interface ITokenPayload {
   id: string;
+  email: string;
   nickname: string;
   role: RoleType;
 }

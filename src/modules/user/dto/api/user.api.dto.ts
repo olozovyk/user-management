@@ -1,4 +1,4 @@
-import { RoleType } from '@common/types';
+import { RoleType } from '@modules/user/types';
 
 export class UserApiDto {
   /*

@@ -1,7 +1,8 @@
+import * as request from 'supertest';
+
 import { INestApplication } from '@nestjs/common';
 import { CreateUserDto, LoginDto } from '@modules/auth/dto';
-import * as request from 'supertest';
-import { RoleType } from '@common/types';
+import { RoleType } from '@modules/user/types';
 
 interface IEditUserParams {
   userId: string;
