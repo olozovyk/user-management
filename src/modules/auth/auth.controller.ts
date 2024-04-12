@@ -151,10 +151,12 @@ export class AuthController {
   }
 
   /**
-   * Send a link to verify email
+   * Request a link to verify email
    */
-  @Get('send-verification-link')
+  @Get('request-verification-link')
+  @ApiBearerAuth()
   @ApiOkResponse({ description: 'A verification link has been sent' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiInternalServerErrorResponse({
     description: 'A verification link has not been sent',
   })
