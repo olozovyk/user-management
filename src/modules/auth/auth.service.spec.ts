@@ -6,6 +6,7 @@ import { UserService } from '../user/user.service';
 import { AuthRepository } from './auth.repository';
 import { User } from '@modules/user/entities';
 import * as createHashUtil from '../../common/utils/createHash';
+import { EmailService } from './email.service';
 
 const mockedUser: Partial<User> = {
   id: '1',
@@ -34,6 +35,7 @@ describe('AuthService', () => {
         ConfigService,
         { provide: AuthRepository, useValue: authRepository },
         { provide: UserService, useValue: usersService },
+        EmailService,
       ],
     }).compile();
 

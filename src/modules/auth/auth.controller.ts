@@ -57,7 +57,9 @@ export class AuthController {
     const newUser = await this.authService.signup(body);
 
     try {
-      await this.authService.sendVerificationEmail(newUser.id, newUser.email);
+      if (process.env.NODE_ENV !== 'test') {
+        await this.authService.sendVerificationEmail(newUser.id, newUser.email);
+      }
     } catch (e) {
       this.logger.error('Failed to send verification email');
     }
