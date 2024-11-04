@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Init1712310065519 implements MigrationInterface {
-  name = 'Init1712310065519';
+export class Init1730739858866 implements MigrationInterface {
+  name = 'Init1730739858866';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
@@ -20,6 +20,9 @@ export class Init1712310065519 implements MigrationInterface {
                 "userId" uuid NOT NULL,
                 CONSTRAINT "PK_3001e89ada36263dabf1fb6210a" PRIMARY KEY ("id")
             )
+        `);
+    await queryRunner.query(`
+            CREATE TYPE "public"."users_role_enum" AS ENUM('user', 'moderator', 'admin')
         `);
     await queryRunner.query(`
             CREATE TABLE "users" (
@@ -87,6 +90,9 @@ export class Init1712310065519 implements MigrationInterface {
         `);
     await queryRunner.query(`
             DROP TABLE "users"
+        `);
+    await queryRunner.query(`
+            DROP TYPE "public"."users_role_enum"
         `);
     await queryRunner.query(`
             DROP TABLE "tokens"
