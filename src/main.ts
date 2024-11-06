@@ -1,16 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
+import * as bodyParser from 'body-parser';
 
 import { AppModule } from '@modules/app.module';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from '@common/filters';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { requestsLogger } from './middlewares';
 
 async function bootstrap() {
   process.env.TZ = 'UTC';
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'log'],
+  });
+  app.use(bodyParser.json());
+  app.use(requestsLogger);
 
   app.useGlobalPipes(
     new ValidationPipe({

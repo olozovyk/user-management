@@ -1,5 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  PutObjectCommandOutput,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -8,9 +12,18 @@ export class S3Service {
 
   private readonly logger = new Logger(S3Service.name);
 
-  private client = new S3Client({});
+  private client = new S3Client({
+    region: 'eu-central-1',
+    credentials: {
+      accessKeyId: this.configService.getOrThrow('ACCESS_KEY'),
+      secretAccessKey: this.configService.getOrThrow('SECRET_ACCESS_KEY'),
+    },
+  });
 
-  public async sendFile(file: Buffer, key: string): Promise<void> {
+  public async sendFile(
+    file: Buffer,
+    key: string,
+  ): Promise<PutObjectCommandOutput | undefined> {
     const input = {
       Body: file,
       Bucket: this.configService.getOrThrow('BUCKET'),
@@ -19,7 +32,7 @@ export class S3Service {
     const command = new PutObjectCommand(input);
 
     try {
-      await this.client.send(command);
+      return await this.client.send(command);
     } catch (e) {
       this.logger.error(e);
     }

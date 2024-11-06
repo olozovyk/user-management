@@ -5,13 +5,20 @@ import {
   SendEmailCommandInput,
   SendEmailCommandOutput,
 } from '@aws-sdk/client-ses';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
+  constructor(private readonly configService: ConfigService) {}
+
   private readonly logger = new Logger(EmailService.name);
 
   private client = new SESClient({
     region: 'eu-central-1',
+    credentials: {
+      accessKeyId: this.configService.getOrThrow('ACCESS_KEY'),
+      secretAccessKey: this.configService.getOrThrow('SECRET_ACCESS_KEY'),
+    },
   });
 
   public async send(

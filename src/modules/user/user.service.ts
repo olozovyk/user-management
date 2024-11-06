@@ -178,13 +178,15 @@ export class UserService {
     const fileExtension = getExtensionFromOriginalName(file.originalname);
     const key = `${userId}.${fileExtension}`;
 
-    await this.s3Service.sendFile(file.buffer, key);
+    const result = await this.s3Service.sendFile(file.buffer, key);
+    if (result === undefined) {
+      throw new InternalServerErrorException(`Avatar was not uploaded`);
+    }
 
     const publicUrl = this.configService.getOrThrow('OBJECT_PUBLIC_URL');
     const avatarUrl = publicUrl + key;
 
     await this.userRepository.saveAvatarUrl(userId, avatarUrl);
-
     return avatarUrl;
   }
 }
