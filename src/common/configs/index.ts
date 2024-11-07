@@ -1,2 +1,2 @@
 export * from './postgres.config';
-export * from './migrationsDataSource';
+export * from './migrations-data-source';

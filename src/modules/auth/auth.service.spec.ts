@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/services';
 import { AuthRepository } from './auth.repository';
 import { User } from '@modules/user/entities';
-import * as createHashUtil from '../../common/utils/createHash';
+import * as createHashUtil from '../../common/utils/create-hash';
 import { EmailService } from './email.service';
 
 const mockedUser: Partial<User> = {

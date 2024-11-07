@@ -11,7 +11,7 @@ import { UserRepository } from '../user.repository';
 import {
   createHash,
   getExtensionFromOriginalName,
-  getSkipForPagination,
+  getSkipValueForPagination,
 } from '@common/utils';
 import { User } from '../entities';
 import { CreateUserDto } from '@modules/auth/dto';
@@ -48,7 +48,7 @@ export class UserService {
   }
 
   public getUsers(limit: number, page: number): Promise<User[]> {
-    const skip = getSkipForPagination(limit, page);
+    const skip = getSkipValueForPagination(limit, page);
     return this.userRepository.getUsers(limit, skip);
   }
 
