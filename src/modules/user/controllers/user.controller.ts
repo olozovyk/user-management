@@ -141,10 +141,40 @@ export class UserController {
     await this.userService.softDeleteUser(id);
   }
 
+  // /**
+  //  * Submit a vote for the user
+  //  */
+  // @Post(':id/rating')
+  // @ApiBearerAuth()
+  // @ApiHeader({
+  //   name: 'If-Unmodified-Since',
+  //   description: 'Last modified date',
+  //   required: true,
+  // })
+  // @ApiParam({ name: 'id', description: 'User ID you vote for' })
+  // @ApiOkResponse({ description: 'The vote is counted' })
+  // @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  // @ApiBadRequestResponse({ description: 'Bad request' })
+  // @ApiNotFoundResponse({ description: 'Not found' })
+  // @UseGuards(AuthGuard, UserExistingGuard, ProtectUserChangesByTimeGuard)
+  // @HttpCode(HttpStatus.OK)
+  // public async vote(
+  //   @Req() req: Request & { user: ITokenPayload },
+  //   @Param('id') targetUserId: string,
+  //   @Body() { vote }: VoteDto,
+  // ) {
+  //   const userId = req.user.id;
+  //   await this.userService.vote(userId, targetUserId, vote);
+
+  //   return {
+  //     message: vote === 0 ? 'The vote is removed' : 'The vote is received',
+  //   };
+  // }
+
   /**
    * Submit a vote for the user
    */
-  @Post(':id/rating')
+  @Post(':nickname/rating')
   @ApiBearerAuth()
   @ApiHeader({
     name: 'If-Unmodified-Since',
@@ -156,15 +186,21 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(AuthGuard, UserExistingGuard, ProtectUserChangesByTimeGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
-    @Param('id') targetUserId: string,
+    @Param('nickname') nickname: string,
     @Body() { vote }: VoteDto,
   ) {
     const userId = req.user.id;
-    await this.userService.vote(userId, targetUserId, vote);
+    const targetUser = await this.userService.getUserByNickname(nickname);
+
+    if (!targetUser) {
+      throw new NotFoundException('User is not found');
+    }
+
+    await this.userService.vote(userId, targetUser.id, vote);
 
     return {
       message: vote === 0 ? 'The vote is removed' : 'The vote is received',
