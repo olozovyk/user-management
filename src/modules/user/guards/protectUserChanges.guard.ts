@@ -6,7 +6,7 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
-import { UserService } from '@modules/user/user.service';
+import { UserService } from '@modules/user/services';
 
 @Injectable()
 export class ProtectUserChangesGuard implements CanActivate {

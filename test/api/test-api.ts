@@ -34,11 +34,17 @@ export class TestApi {
   }
 
   public getUsers(): request.Test {
-    return request(this._app.getHttpServer()).get('/users/');
+    return request(this._app.getHttpServer()).get('/public/users/');
   }
 
-  public getUserById(userId: string): request.Test {
-    return request(this._app.getHttpServer()).get(`/users/${userId}`);
+  public getUserById(userId: string, token?: string): request.Test {
+    return request(this._app.getHttpServer())
+      .get(`/users/${userId}`)
+      .set('Authorization', `Bearer ${token}`);
+  }
+
+  public getUserByNickname(nickname: string): request.Test {
+    return request(this._app.getHttpServer()).get(`/public/users/${nickname}`);
   }
 
   public createUser(createUserDto: Partial<CreateUserDto>): request.Test {

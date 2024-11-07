@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services';
 import { AuthRepository } from './auth.repository';
 import { User } from '@modules/user/entities';
 import * as createHashUtil from '../../common/utils/createHash';

@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { UserRepository } from './user.repository';
+import { UserRepository } from '../user.repository';
 import { S3Service } from './s3.service';
 import { ConfigService } from '@nestjs/config';
-import { User } from './entities';
+import { User } from '../entities';
 
 let mockedUser: Partial<User> = {
   id: '1',

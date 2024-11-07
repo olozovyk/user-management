@@ -2,16 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UserService } from './user.service';
+import { UserService } from './services';
 import { UserRepository } from './user.repository';
-import { UserController } from './user.controller';
-import { S3Service } from './s3.service';
+import { UserController, PublicUser } from './controllers';
+import { S3Service } from './services/s3.service';
 import { Avatar, User, Vote } from '@modules/user/entities';
 
 @Module({
   providers: [UserService, UserRepository, S3Service],
   exports: [UserService],
-  controllers: [UserController],
+  controllers: [PublicUser, UserController],
   imports: [ConfigModule, TypeOrmModule.forFeature([User, Vote, Avatar])],
 })
 export class UserModule {}

@@ -1,11 +1,6 @@
 import { RoleType } from '@modules/user/types';
 
-export class UserApiDto {
-  /*
-   * @example 215325ea-f09a-40ea-9e73-d2f8b1dc675f
-   * */
-  id: string;
-
+export class PublicUserApiDto {
   /*
    * @example john
    * */
@@ -22,11 +17,6 @@ export class UserApiDto {
   lastName: string;
 
   /*
-   * @example user
-   * */
-  role: RoleType;
-
-  /*
    * @example 17
    * */
   rating: number;
@@ -35,4 +25,21 @@ export class UserApiDto {
    * @example https://user-management-avatars.s3.eu-central-1.amazonaws.com/215325ea-f09a-40ea-9e73-d2f8b1dc675f.jpg
    * */
   avatarUrl: string | null;
+}
+
+export class UserApiDto extends PublicUserApiDto {
+  /*
+   * @example 215325ea-f09a-40ea-9e73-d2f8b1dc675f
+   * */
+  id: string;
+
+  /*
+   * @example john@mail.com
+   * */
+  email: string;
+
+  /*
+   * @example user
+   * */
+  role: RoleType;
 }

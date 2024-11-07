@@ -11,7 +11,7 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 
 import { AuthRepository } from './auth.repository';
-import { UserService } from '@modules/user/user.service';
+import { UserService } from '@modules/user/services';
 import { CreateUserDto, LoginDto } from './dto';
 import { createHash } from '@common/utils';
 import { User } from '@modules/user/entities';
@@ -161,7 +161,7 @@ export class AuthService {
     try {
       await this.jwtService.verifyAsync(token, { secret });
       return this.jwtService.decode(token) as ITokenPayload;
-    } catch (e) {
+    } catch {
       this.logger.error('Token is not valid');
     }
   }
@@ -213,7 +213,7 @@ export class AuthService {
       const message = `Please go to ${URL}${path} to verify your email.`;
 
       await this.emailService.send(this.EMAIL_SENDER, to, message);
-    } catch (e) {
+    } catch {
       throw new InternalServerErrorException(
         'Failed to send verification email',
       );

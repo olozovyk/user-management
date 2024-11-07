@@ -17,6 +17,14 @@ export class UserRepository {
     private readonly avatarRepository: Repository<Avatar>,
   ) {}
 
+  public getUsers(limit: number, skip: number): Promise<User[]> {
+    return this.userRepository.find({
+      take: limit,
+      skip,
+      relations: { avatar: true },
+    });
+  }
+
   public saveEmailVerificationToken(
     userId: string,
     token: string,
@@ -38,14 +46,6 @@ export class UserRepository {
       { id: userId },
       { verifiedEmail: true, emailVerificationToken: null },
     );
-  }
-
-  public getUsers(limit: number, skip: number): Promise<User[]> {
-    return this.userRepository.find({
-      take: limit,
-      skip,
-      relations: { avatar: true },
-    });
   }
 
   public createUser(user: CreateUserDto): Promise<User> {

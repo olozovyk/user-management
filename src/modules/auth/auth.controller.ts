@@ -35,7 +35,7 @@ import { IUser } from '@modules/user/types';
 import { ITokenPayload } from './types';
 
 @Controller('auth')
-@ApiTags('auth')
+@ApiTags('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -60,13 +60,13 @@ export class AuthController {
       if (process.env.NODE_ENV !== 'test') {
         await this.authService.sendVerificationEmail(newUser.id, newUser.email);
       }
-    } catch (e) {
+    } catch {
       this.logger.error('Failed to send verification email');
     }
 
     res.set('Last-Modified', newUser.updatedAt.toUTCString());
     res.json({
-      user: mapUserOutput(newUser),
+      user: mapUserOutput(newUser, true),
     });
   }
 
@@ -92,7 +92,7 @@ export class AuthController {
     res.cookie('token', refreshToken, { httpOnly: true });
     res.set('Last-Modified', user.updatedAt.toUTCString());
     res.json({
-      user: mapUserOutput(user),
+      user: mapUserOutput(user, true),
       token: accessToken,
     });
   }

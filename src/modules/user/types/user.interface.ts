@@ -1,13 +1,16 @@
 import { RoleType } from './roles';
 
-export interface IUser {
-  id: string;
-  email: string;
-  verifiedEmail: boolean;
+export interface IPublicUser {
   nickname: string;
   firstName: string;
   lastName: string;
-  role: RoleType;
   rating: number;
   avatarUrl: string | null;
+}
+
+export interface IUser extends IPublicUser {
+  id: string;
+  email: string;
+  verifiedEmail: boolean;
+  role: RoleType;
 }

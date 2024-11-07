@@ -7,17 +7,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { UserRepository } from './user.repository';
+import { UserRepository } from '../user.repository';
 import {
   createHash,
   getExtensionFromOriginalName,
   getSkipForPagination,
 } from '@common/utils';
-import { User } from './entities';
+import { User } from '../entities';
 import { CreateUserDto } from '@modules/auth/dto';
-import { EditUserDto } from './dto';
+import { EditUserDto } from '../dto';
 import { S3Service } from './s3.service';
-import { Role, RoleType, VoteType } from './types';
+import { Role, RoleType, VoteType } from '../types';
 import { UpdateResult } from 'typeorm';
 
 @Injectable()

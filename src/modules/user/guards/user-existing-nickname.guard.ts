@@ -7,17 +7,15 @@ import {
 import { UserService } from '@modules/user/services';
 
 @Injectable()
-export class UserExistingGuard implements CanActivate {
+export class UserExistingGuardByNickname implements CanActivate {
   constructor(private usersService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    // if (!request.params.id) {
-    //   return true;
-    // }
-
-    const user = await this.usersService.getUserById(request.params.id);
+    const user = await this.usersService.getUserByNickname(
+      request.params.nickname,
+    );
 
     if (!user) {
       throw new NotFoundException('User is not found');

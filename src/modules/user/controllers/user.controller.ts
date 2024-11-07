@@ -12,7 +12,6 @@ import {
   ParseFilePipe,
   Patch,
   Post,
-  Query,
   Req,
   Res,
   UploadedFile,
@@ -37,66 +36,50 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { UserService } from './user.service';
+import { UserService } from '../services';
 import { AuthGuard } from '@modules/auth/guards';
 import {
   PermissionToChangeGuard,
   ProtectUserChangesGuard,
   UserExistingGuard,
-} from './guards';
+} from '../guards';
 
 import { mapUserOutput } from '@common/utils';
-import { EditUserDto, QueryPaginationDto, VoteDto } from './dto';
+import { EditUserDto, VoteDto } from '../dto';
 import {
   AvatarApiDto,
   FileUploadApiDto,
-  GetAllUsersApiDto,
   GetUserApiDto,
 } from '@modules/user/dto/api';
-import { IUser } from './types';
+import { IUser } from '../types';
 import { ITokenPayload } from '@modules/auth/types';
+import { User } from '../entities';
 
 @Controller('users')
-@ApiTags('user')
+@ApiTags('User')
 export class UserController {
   constructor(private userService: UserService) {}
-
-  /**
-   * Get all users
-   */
-  @Get()
-  @ApiOkResponse({ type: GetAllUsersApiDto })
-  public async getUsers(
-    @Query() query: QueryPaginationDto,
-  ): Promise<{ users: IUser[] }> {
-    const limit = query.limit || 20;
-    const page = query.page || 1;
-
-    const users = await this.userService.getUsers(limit, page);
-
-    const usersToReturn: IUser[] = users.map(user => mapUserOutput(user));
-
-    return {
-      users: usersToReturn,
-    };
-  }
 
   /**
    * Get user by ID
    */
   @Get(':id')
   @ApiOkResponse({ type: GetUserApiDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(UserExistingGuard)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, UserExistingGuard)
   public async getUserById(
+    // param is needed for swagger:
     @Param('id') id: string,
+    @Req() req: Request & { user: User },
     @Res() res: Response<{ user: IUser }>,
   ) {
-    const user = await this.userService.getUserById(id);
+    // const user = await this.userService.getUserById(id);
 
-    res.set('Last-Modified', user.updatedAt.toUTCString());
+    res.set('Last-Modified', req.user.updatedAt.toUTCString());
     res.json({
-      user: mapUserOutput(user),
+      user: mapUserOutput(req.user, true),
     });
   }
 
@@ -139,7 +122,7 @@ export class UserController {
 
     res.set('Last-Modified', updatedUser.updatedAt.toUTCString());
     res.json({
-      user: mapUserOutput(updatedUser),
+      user: mapUserOutput(updatedUser, true),
     });
   }
 
@@ -152,8 +135,8 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'Not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard, UserExistingGuard, PermissionToChangeGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
     await this.userService.softDeleteUser(id);
   }

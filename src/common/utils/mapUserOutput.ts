@@ -1,7 +1,9 @@
 import { User } from '@modules/user/entities';
-import { IUser } from '@modules/user/types';
+import { IPublicUser, IUser } from '@modules/user/types';
 
-export const mapUserOutput = (user: User): IUser => {
+function mapUserOutput(user: User, isProtected: true): IUser;
+function mapUserOutput(user: User, isProtected?: false): IPublicUser;
+function mapUserOutput(user: User, isProtected?: boolean): IPublicUser | IUser {
   const {
     id,
     email,
@@ -13,15 +15,26 @@ export const mapUserOutput = (user: User): IUser => {
     rating,
     avatar,
   } = user;
-  return {
-    id,
-    email,
-    verifiedEmail,
+
+  const userToReturn = {
     nickname,
     firstName,
     lastName,
-    role,
     rating,
     avatarUrl: avatar ? avatar.avatarUrl : null,
   };
-};
+
+  if (isProtected) {
+    return {
+      ...userToReturn,
+      id,
+      email,
+      verifiedEmail,
+      role,
+    };
+  }
+
+  return userToReturn;
+}
+
+export { mapUserOutput };
