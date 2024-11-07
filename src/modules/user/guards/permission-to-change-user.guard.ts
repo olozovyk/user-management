@@ -7,7 +7,7 @@ import {
 import { Role } from '../types';
 
 @Injectable()
-export class PermissionToChangeGuard implements CanActivate {
+export class PermissionToChangeUserGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 

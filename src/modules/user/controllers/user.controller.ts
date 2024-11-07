@@ -39,8 +39,8 @@ import {
 import { UserService } from '../services';
 import { AuthGuard } from '@modules/auth/guards';
 import {
-  PermissionToChangeGuard,
-  ProtectUserChangesGuard,
+  PermissionToChangeUserGuard,
+  ProtectUserChangesByTimeGuard,
   UserExistingGuard,
 } from '../guards';
 
@@ -101,8 +101,8 @@ export class UserController {
   @UseGuards(
     AuthGuard,
     UserExistingGuard,
-    PermissionToChangeGuard,
-    ProtectUserChangesGuard,
+    PermissionToChangeUserGuard,
+    ProtectUserChangesByTimeGuard,
   )
   public async editUser(
     @Param('id') id: string,
@@ -135,7 +135,7 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'Not found' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
-  @UseGuards(AuthGuard, UserExistingGuard, PermissionToChangeGuard)
+  @UseGuards(AuthGuard, UserExistingGuard, PermissionToChangeUserGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   public async deleteUser(@Param('id') id: string) {
     await this.userService.softDeleteUser(id);
@@ -156,7 +156,7 @@ export class UserController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(AuthGuard, UserExistingGuard, ProtectUserChangesGuard)
+  @UseGuards(AuthGuard, UserExistingGuard, ProtectUserChangesByTimeGuard)
   @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
@@ -193,8 +193,8 @@ export class UserController {
   @UseGuards(
     AuthGuard,
     UserExistingGuard,
-    PermissionToChangeGuard,
-    ProtectUserChangesGuard,
+    PermissionToChangeUserGuard,
+    ProtectUserChangesByTimeGuard,
   )
   @UseInterceptors(FileInterceptor('avatar'))
   async uploadAvatar(

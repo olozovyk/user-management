@@ -9,7 +9,7 @@ import {
 import { UserService } from '@modules/user/services';
 
 @Injectable()
-export class ProtectUserChangesGuard implements CanActivate {
+export class ProtectUserChangesByTimeGuard implements CanActivate {
   constructor(private userService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
