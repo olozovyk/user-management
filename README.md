@@ -15,7 +15,7 @@ been implemented. The service also includes Swagger documentation and unit
 tests, as well as end-to-end tests.
 
 You can familiarize with the API through
-[Swagger](https://ec2-52-58-90-89.eu-central-1.compute.amazonaws.com/um/api/docs).
+[Swagger](https://um.lozovyk.space/api/docs).
 
 To run the project locally, first install npm dependencies using the npm install
 command and set environment variables in the `.env` file. See the example in the
