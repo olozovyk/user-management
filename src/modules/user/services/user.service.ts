@@ -125,16 +125,22 @@ export class UserService {
 
   public async vote(
     userId: string,
-    targetUserId: string,
+    targetNickname: string,
     voteValue: VoteType,
   ): Promise<void> {
-    if (userId === targetUserId) {
+    const targetUser = await this.getUserByNickname(targetNickname);
+
+    if (!targetUser) {
+      throw new NotFoundException('User is not found');
+    }
+
+    if (userId === targetUser.id) {
       throw new BadRequestException('You cannot give the vote for yourself');
     }
 
     const existingVote = await this.userRepository.getVote(
       userId,
-      targetUserId,
+      targetUser.id,
     );
 
     if (!existingVote) {
@@ -144,7 +150,7 @@ export class UserService {
 
       const updateResult = await this.userRepository.createVote(
         userId,
-        targetUserId,
+        targetUser.id,
         voteValue,
       );
 
@@ -162,7 +168,7 @@ export class UserService {
     const updateResult = await this.userRepository.updateVote({
       existingVote,
       userId,
-      targetUserId,
+      targetUserId: targetUser.id,
       voteValue,
     });
 
