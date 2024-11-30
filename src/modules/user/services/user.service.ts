@@ -28,6 +28,16 @@ export class UserService {
     private configService: ConfigService,
   ) {}
 
+  public async getUserIdByNickname(nickname: string): Promise<string> {
+    const user = await this.getUserByNickname(nickname);
+
+    if (!user) {
+      throw new NotFoundException('User with this nickname does not exist');
+    }
+
+    return user.id;
+  }
+
   public saveEmailVerificationToken(
     userId: string,
     token: string,
@@ -56,8 +66,14 @@ export class UserService {
     return this.userRepository.createUser(user);
   }
 
-  public getUserByNickname(nickname: string): Promise<User | null> {
-    return this.userRepository.getUserByNickname(nickname);
+  public async getUserByNickname(nickname: string): Promise<User> {
+    const user = await this.userRepository.getUserByNickname(nickname);
+
+    if (!user) {
+      throw new NotFoundException('User with this nickname does not exist');
+    }
+
+    return user;
   }
 
   public async getUserById(id: string): Promise<User> {
@@ -125,22 +141,16 @@ export class UserService {
 
   public async vote(
     userId: string,
-    targetNickname: string,
+    targetUserId: string,
     voteValue: VoteType,
   ): Promise<void> {
-    const targetUser = await this.getUserByNickname(targetNickname);
-
-    if (!targetUser) {
-      throw new NotFoundException('User is not found');
-    }
-
-    if (userId === targetUser.id) {
+    if (userId === targetUserId) {
       throw new BadRequestException('You cannot give the vote for yourself');
     }
 
     const existingVote = await this.userRepository.getVote(
       userId,
-      targetUser.id,
+      targetUserId,
     );
 
     if (!existingVote) {
@@ -150,7 +160,7 @@ export class UserService {
 
       const updateResult = await this.userRepository.createVote(
         userId,
-        targetUser.id,
+        targetUserId,
         voteValue,
       );
 
@@ -168,7 +178,7 @@ export class UserService {
     const updateResult = await this.userRepository.updateVote({
       existingVote,
       userId,
-      targetUserId: targetUser.id,
+      targetUserId: targetUserId,
       voteValue,
     });
 

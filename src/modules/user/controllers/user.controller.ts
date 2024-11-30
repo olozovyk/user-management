@@ -61,6 +61,27 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   /**
+   * Get user ID by nickname
+   * */
+  @Get('user-by-nickname/:nickname')
+  @ApiOkResponse({ type: GetUserApiDto })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @ApiNotFoundResponse({ description: 'Not found' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  public async getUserIdByNickname(
+    @Param('nickname') nickname: string,
+    @Res() res: Response,
+  ) {
+    const user = await this.userService.getUserByNickname(nickname);
+    res.set('Last-Modified', user.updatedAt.toUTCString());
+
+    res.json({
+      user: mapUserOutput(user, true),
+    });
+  }
+
+  /**
    * Get user by ID
    */
   @Get(':id')
@@ -144,14 +165,14 @@ export class UserController {
   /**
    * Submit a vote for the user
    */
-  @Post(':nickname/rating')
+  @Post(':id/rating')
   @ApiBearerAuth()
-  // @ApiHeader({
-  //   name: 'If-Unmodified-Since',
-  //   description: 'Last modified date',
-  //   required: true,
-  // })
-  @ApiParam({ name: 'nickname', description: 'User nickname you vote for' })
+  @ApiHeader({
+    name: 'If-Unmodified-Since',
+    description: 'Last modified date',
+    required: true,
+  })
+  @ApiParam({ name: 'id', description: 'User ID you vote for' })
   @ApiOkResponse({ description: 'The vote is counted' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -160,10 +181,10 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async vote(
     @Req() req: Request & { user: ITokenPayload },
-    @Param('nickname') nickname: string,
+    @Param('id') userId: string,
     @Body() { vote }: VoteDto,
   ) {
-    await this.userService.vote(req.user.id, nickname, vote);
+    await this.userService.vote(req.user.id, userId, vote);
 
     return {
       message: vote === 0 ? 'The vote is removed' : 'The vote is received',
