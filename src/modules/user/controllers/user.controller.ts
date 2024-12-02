@@ -74,6 +74,11 @@ export class UserController {
     @Res() res: Response,
   ) {
     const user = await this.userService.getUserByNickname(nickname);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     res.set('Last-Modified', user.updatedAt.toUTCString());
 
     res.json({

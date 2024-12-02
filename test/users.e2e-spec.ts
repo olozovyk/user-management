@@ -56,6 +56,7 @@ describe('Users (e2e)', () => {
 
   afterEach(async () => {
     const userId = user?.body.user.id;
+
     if (userId) {
       await usersService.deleteUser(userId);
       user = null;
@@ -258,20 +259,20 @@ describe('Users (e2e)', () => {
 
   // it('/users/:id/rating (POST) 200 - success (should change rating)', async () => {
   //   user = await testApi.createUser(createUserDto);
+  //
   //   secondUser = await testApi.createUser(secondUserDto);
-
+  //
   //   const loggedUser = await testApi.login(loginUserDto);
   //   const token = loggedUser.body.token;
-
+  //
   //   const targetUserId = secondUser.body.user.id;
   //   const voteValue = 1;
   //   const lastModified = secondUser.headers['last-modified'];
-
+  //
   //   await testApi
   //     .vote({ targetUserId, voteValue, lastModified, token })
   //     .expect(200);
-
-  //   // TODO: it should be a public way to find users without using extended user info
+  //
   //   const updatedRating = (await testApi.getUserById(targetUserId)).body.user
   //     .rating;
   //   expect(updatedRating).toBe(1);
@@ -280,37 +281,36 @@ describe('Users (e2e)', () => {
   // it('/users/:id/rating (POST) 400 - fail (should throw an error - an unacceptable value)', async () => {
   //   user = await testApi.createUser(createUserDto);
   //   secondUser = await testApi.createUser(secondUserDto);
-
+  //
   //   const loggedUser = await testApi.login(loginUserDto);
   //   const token = loggedUser.body.token;
-
+  //
   //   const targetUserId = secondUser.body.user.id;
   //   const voteValue = 2;
   //   const lastModified = secondUser.headers['last-modified'];
-
+  //
   //   const res = await testApi
   //     .vote({ targetUserId, voteValue, lastModified, token })
   //     .expect(400);
   //   expect(res.body.message).toEqual(['Accepted value are 1, 0, -1']);
   // });
-
+  //
   // it('/users/:id/rating (POST) 400 - fail (should throw an error - user has already voted)', async () => {
   //   user = await testApi.createUser(createUserDto);
   //   secondUser = await testApi.createUser(secondUserDto);
-
+  //
   //   const loggedUser = await testApi.login(loginUserDto);
   //   const token = loggedUser.body.token;
-
+  //
   //   const targetUserId = secondUser.body.user.id;
   //   const voteValue = 1;
   //   let lastModified = secondUser.headers['last-modified'];
-
+  //
   //   await testApi.vote({ targetUserId, voteValue, lastModified, token });
-
-  //   // TODO: it should be a public way to find users without using extended user info
+  //
   //   const updatedTargetUser = await testApi.getUserById(targetUserId);
   //   lastModified = updatedTargetUser.headers['last-modified'];
-
+  //
   //   const res = await testApi
   //     .vote({
   //       targetUserId,

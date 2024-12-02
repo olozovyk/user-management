@@ -66,14 +66,8 @@ export class UserService {
     return this.userRepository.createUser(user);
   }
 
-  public async getUserByNickname(nickname: string): Promise<User> {
-    const user = await this.userRepository.getUserByNickname(nickname);
-
-    if (!user) {
-      throw new NotFoundException('User with this nickname does not exist');
-    }
-
-    return user;
+  public async getUserByNickname(nickname: string): Promise<User | null> {
+    return this.userRepository.getUserByNickname(nickname);
   }
 
   public async getUserById(id: string): Promise<User> {
