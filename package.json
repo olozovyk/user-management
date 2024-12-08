@@ -22,10 +22,10 @@
     "prepare": "husky",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:create": "MIGRATION_NAME=${MIGRATION_NAME:-name} && npm run typeorm migration:create src/common/migrations/$MIGRATION_NAME",
-    "migration:generate": "MIGRATION_NAME=${MIGRATION_NAME:-name} && npm run typeorm migration:generate src/common/migrations/$MIGRATION_NAME -- -d src/common/configs/migrationsDataSource.ts -p",
-    "migration:run": "npm run typeorm migration:run -- -d src/common/configs/migrationsDataSource.ts",
-    "migration:revert": "npm run typeorm migration:revert -- -d src/common/configs/migrationsDataSource.ts",
-    "migration:show": "npm run typeorm migration:show -- -d src/common/configs/migrationsDataSource.ts"
+    "migration:generate": "MIGRATION_NAME=${MIGRATION_NAME:-name} && npm run typeorm migration:generate src/common/migrations/$MIGRATION_NAME -- -d src/common/configs/migrations-data-source.ts -p",
+    "migration:run": "npm run typeorm migration:run -- -d src/common/configs/migrations-data-source.ts",
+    "migration:revert": "npm run typeorm migration:revert -- -d src/common/configs/migrations-data-source.ts",
+    "migration:show": "npm run typeorm migration:show -- -d src/common/configs/migrations-data-source.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.685.0",
