@@ -17,7 +17,6 @@ import { join } from 'node:path';
 import { AuthService } from './auth.service';
 import { mapUserOutput } from '@common/utils';
 import { CreateUserDto, LoginDto } from './dto';
-import { User } from '@common/decorators';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -32,7 +31,7 @@ import { AuthGuard } from './guards';
 import { RefreshApiDto, LoginApiDto } from '@modules/auth/dto/api';
 import { GetUserApiDto } from '@modules/user/dto/api';
 import { IUser } from '@modules/user/types';
-import { ITokenPayload } from './types';
+import { RequestWithTokenPayload } from './types';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -166,9 +165,10 @@ export class AuthController {
     description: 'A verification link has not been sent',
   })
   @UseGuards(AuthGuard)
-  public async sendEmailWithVerificationLink(@User() user: ITokenPayload) {
-    await this.authService.sendVerificationEmail(user.id, user.email);
-
+  public async sendEmailWithVerificationLink(
+    @Req() req: RequestWithTokenPayload,
+  ) {
+    await this.authService.sendVerificationEmail(req.user.id, req.user.email);
     return { message: 'A verification link has been sent' };
   }
 }

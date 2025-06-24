@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { UserService } from '@modules/user/services';
-import { ITokenPayload } from '@modules/auth/types';
+import { RequestWithTokenPayload } from '@modules/auth/types';
 
 @Injectable()
 export class ProtectUserChangesByTimeGuard implements CanActivate {
@@ -17,7 +17,7 @@ export class ProtectUserChangesByTimeGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
       .switchToHttp()
-      .getRequest<Request & { user: ITokenPayload }>();
+      .getRequest<RequestWithTokenPayload>();
 
     const ifUnmodifiedSinceHeader = request.get('If-unmodified-since');
 

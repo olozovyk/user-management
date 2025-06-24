@@ -51,9 +51,8 @@ import {
   FileUploadApiDto,
   GetUserApiDto,
 } from '@modules/user/dto/api';
-import { IUser } from '../types';
-import { ITokenPayload } from '@modules/auth/types';
-import { User } from '../entities';
+import { IUser, RequestWithUserEntity } from '../types';
+import { RequestWithTokenPayload } from '@modules/auth/types';
 
 @Controller('users')
 @ApiTags('User')
@@ -95,10 +94,10 @@ export class UserController {
   @ApiNotFoundResponse({ description: 'Not found' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard, UserExistingGuard)
-  public async getUserById(
+  public getUserById(
     // param is needed for swagger:
     @Param('id') id: string,
-    @Req() req: Request & { user: User },
+    @Req() req: RequestWithUserEntity,
     @Res() res: Response<{ user: IUser }>,
   ) {
     // const user = await this.userService.getUserById(id);
@@ -133,7 +132,7 @@ export class UserController {
   public async editUser(
     @Param('id') id: string,
     @Body() body: EditUserDto,
-    @Req() req: Request & { user: ITokenPayload },
+    @Req() req: RequestWithUserEntity,
     @Res() res: Response<{ user: IUser }>,
   ) {
     const updatedUser = await this.userService.editUser(
@@ -185,7 +184,7 @@ export class UserController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   public async vote(
-    @Req() req: Request & { user: ITokenPayload },
+    @Req() req: RequestWithTokenPayload,
     @Param('id') userId: string,
     @Body() { vote }: VoteDto,
   ) {

@@ -5,21 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from '@modules/user/services';
-import { Request } from 'express';
-import { UserEntity } from '../entities';
+import { RequestWithUserEntity } from '../types';
 
 @Injectable()
 export class UserExistingGuard implements CanActivate {
   constructor(private usersService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context
-      .switchToHttp()
-      .getRequest<Request & { user: UserEntity }>();
-
-    // if (!request.params.id) {
-    //   return true;
-    // }
+    const request = context.switchToHttp().getRequest<RequestWithUserEntity>();
 
     const user = await this.usersService.getUserById(request.params.id);
 

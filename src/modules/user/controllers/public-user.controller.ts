@@ -1,22 +1,19 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   Query,
-  Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 
 import { UserService } from '../services';
-import { UserExistingGuardByNickname } from '../guards';
 import { mapUserOutput } from '@common/utils';
 import { GetAllUsersApiDto, GetPublicUserApiDto } from '../dto/api';
 import { QueryPaginationDto } from '../dto';
 import { IPublicUser } from '../types';
-import { User } from '../entities';
 
 @Controller('public/users')
 @ApiTags('User (public)')
@@ -47,15 +44,18 @@ export class PublicUser {
   @Get(':nickname')
   @ApiOkResponse({ type: GetPublicUserApiDto })
   @ApiNotFoundResponse({ description: 'Not found' })
-  @UseGuards(UserExistingGuardByNickname)
   public async getUserByNickname(
-    // param is needed for swagger:
     @Param('nickname') nickname: string,
-    @Req() req: Request & { user: User },
     @Res() res: Response<{ user: IPublicUser }>,
   ) {
+    const user = await this.userService.getUserByNickname(nickname);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
     res.json({
-      user: mapUserOutput(req.user),
+      user: mapUserOutput(user),
     });
   }
 }
