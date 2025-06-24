@@ -13,13 +13,23 @@ export class EmailService {
 
   private readonly logger = new Logger(EmailService.name);
 
-  private client = new SESClient({
-    region: 'eu-central-1',
-    credentials: {
-      accessKeyId: this.configService.getOrThrow('ACCESS_KEY'),
-      secretAccessKey: this.configService.getOrThrow('SECRET_ACCESS_KEY'),
-    },
-  });
+  // private client = new SESClient({
+  //   region: 'eu-central-1',
+  //   credentials: {
+  //     accessKeyId: this.configService.getOrThrow('ACCESS_KEY'),
+  //     secretAccessKey: this.configService.getOrThrow('SECRET_ACCESS_KEY'),
+  //   },
+  // });
+
+  private get client() {
+    return new SESClient({
+      region: 'eu-central-1',
+      credentials: {
+        accessKeyId: this.configService.getOrThrow('ACCESS_KEY'),
+        secretAccessKey: this.configService.getOrThrow('SECRET_ACCESS_KEY'),
+      },
+    });
+  }
 
   public async send(
     from: string,

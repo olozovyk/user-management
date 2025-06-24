@@ -106,7 +106,10 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  public async logout(@Req() req: Request, @Res() res: Response) {
+  public async logout(
+    @Req() req: Request & { cookies: { token: string } },
+    @Res() res: Response,
+  ) {
     await this.authService.deleteToken(req.cookies.token);
     res.clearCookie('token');
     res.sendStatus(HttpStatus.NO_CONTENT);
@@ -120,7 +123,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @HttpCode(HttpStatus.OK)
   public async refresh(
-    @Req() req: Request,
+    @Req() req: Request & { cookies: { token: string } },
     @Res() res: Response<{ token: string }>,
   ) {
     const oldToken = req.cookies.token;

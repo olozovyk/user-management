@@ -4,11 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from '../user/services';
 import { AuthRepository } from './auth.repository';
-import { User } from '@modules/user/entities';
+import { UserEntity } from '@modules/user/entities';
 import * as createHashUtil from '../../common/utils/create-hash';
 import { EmailService } from './email.service';
 
-const mockedUser: Partial<User> = {
+const mockedUser: Partial<UserEntity> = {
   id: '1',
   nickname: 'john',
   password: '12345',

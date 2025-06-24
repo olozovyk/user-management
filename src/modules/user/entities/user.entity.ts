@@ -14,7 +14,7 @@ import { Avatar } from './avatar.entity';
 import { Role, RoleType } from '../types';
 
 @Entity({ name: 'users' })
-export class User {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

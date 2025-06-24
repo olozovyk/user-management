@@ -1,9 +1,12 @@
-import { User } from '@modules/user/entities';
+import { UserEntity } from '@modules/user/entities';
 import { IPublicUser, IUser } from '@modules/user/types';
 
-function mapUserOutput(user: User, isProtected: true): IUser;
-function mapUserOutput(user: User, isProtected?: false): IPublicUser;
-function mapUserOutput(user: User, isProtected?: boolean): IPublicUser | IUser {
+function mapUserOutput(user: UserEntity, isProtected: true): IUser;
+function mapUserOutput(user: UserEntity, isProtected?: false): IPublicUser;
+function mapUserOutput(
+  user: UserEntity,
+  isProtected?: boolean,
+): IPublicUser | IUser {
   const {
     id,
     email,

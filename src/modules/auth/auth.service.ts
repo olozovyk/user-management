@@ -14,7 +14,7 @@ import { AuthRepository } from './auth.repository';
 import { UserService } from '@modules/user/services';
 import { CreateUserDto, LoginDto } from './dto';
 import { createHash } from '@common/utils';
-import { User } from '@modules/user/entities';
+import { UserEntity } from '@modules/user/entities';
 import { EmailService } from './email.service';
 import { ITokenPayload, ITokens } from './types';
 
@@ -30,11 +30,23 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  private EMAIL_SENDER = this.configService.getOrThrow('EMAIL_SENDER');
-  private BASE_URL = this.configService.getOrThrow('BASE_URL');
-  private BASE_URL_LOCAL = this.configService.getOrThrow('BASE_URL_LOCAL');
+  // private EMAIL_SENDER = this.configService.getOrThrow('EMAIL_SENDER');
+  // private BASE_URL = this.configService.getOrThrow('BASE_URL');
+  // private BASE_URL_LOCAL = this.configService.getOrThrow('BASE_URL_LOCAL');
 
-  public async signup(user: CreateUserDto): Promise<User> {
+  private get EMAIL_SENDER() {
+    return this.configService.getOrThrow<string>('EMAIL_SENDER');
+  }
+
+  private get BASE_URL(): string {
+    return this.configService.getOrThrow<string>('BASE_URL');
+  }
+
+  private get BASE_URL_LOCAL(): string {
+    return this.configService.getOrThrow<string>('BASE_URL_LOCAL');
+  }
+
+  public async signup(user: CreateUserDto): Promise<UserEntity> {
     const password = createHash(user.password);
 
     const userToCreate = {
@@ -53,7 +65,9 @@ export class AuthService {
     return this.usersService.createUser(userToCreate);
   }
 
-  public async login(body: LoginDto): Promise<{ user: User; tokens: ITokens }> {
+  public async login(
+    body: LoginDto,
+  ): Promise<{ user: UserEntity; tokens: ITokens }> {
     const existingUser = await this.usersService.getUserByNickname(
       body.nickname,
     );
@@ -130,10 +144,12 @@ export class AuthService {
     nickname,
     role,
   }: ITokenPayload): Promise<ITokens> {
-    const accessSecret = this.configService.get('JWT_ACCESS_SECRET');
-    const accessTtl = this.configService.get('JWT_ACCESS_TTL');
-    const refreshSecret = this.configService.get('JWT_REFRESH_SECRET');
-    const refreshTtl = this.configService.get('JWT_REFRESH_TTL');
+    const accessSecret =
+      this.configService.getOrThrow<string>('JWT_ACCESS_SECRET');
+    const accessTtl = this.configService.getOrThrow<string>('JWT_ACCESS_TTL');
+    const refreshSecret =
+      this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
+    const refreshTtl = this.configService.getOrThrow<string>('JWT_REFRESH_TTL');
 
     const accessToken = await this.jwtService.signAsync(
       { id, email, nickname, role },
@@ -156,11 +172,11 @@ export class AuthService {
   }
 
   private async decodeToken(token: string): Promise<ITokenPayload | void> {
-    const secret = this.configService.get('JWT_REFRESH_SECRET');
+    const secret = this.configService.getOrThrow<string>('JWT_REFRESH_SECRET');
 
     try {
       await this.jwtService.verifyAsync(token, { secret });
-      return this.jwtService.decode(token) as ITokenPayload;
+      return this.jwtService.decode(token);
     } catch {
       this.logger.error('Token is not valid');
     }
@@ -168,7 +184,7 @@ export class AuthService {
 
   public async getUserByEmailVerificationToken(
     emailVerificationToken: string,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     const user = await this.usersService.getUserByEmailVerificationToken(
       emailVerificationToken,
     );

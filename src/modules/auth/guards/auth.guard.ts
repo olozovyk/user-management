@@ -16,7 +16,9 @@ export class AuthGuard implements CanActivate {
   private jwtService = new JwtService();
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user: ITokenPayload }>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
@@ -31,7 +33,7 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Provide a valid token');
     }
 
-    request.user = this.jwtService.decode(token) as ITokenPayload;
+    request.user = this.jwtService.decode(token);
 
     return true;
   }

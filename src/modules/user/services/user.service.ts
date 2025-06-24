@@ -13,7 +13,7 @@ import {
   getExtensionFromOriginalName,
   getSkipValueForPagination,
 } from '@common/utils';
-import { User } from '../entities';
+import { UserEntity } from '../entities';
 import { CreateUserDto } from '@modules/auth/dto';
 import { EditUserDto } from '../dto';
 import { S3Service } from './s3.service';
@@ -47,7 +47,7 @@ export class UserService {
 
   public getUserByEmailVerificationToken(
     emailVerificationToken: string,
-  ): Promise<User | null> {
+  ): Promise<UserEntity | null> {
     return this.userRepository.getUserByEmailVerificationToken(
       emailVerificationToken,
     );
@@ -57,20 +57,20 @@ export class UserService {
     return this.userRepository.setVerifiedEmail(userId);
   }
 
-  public getUsers(limit: number, page: number): Promise<User[]> {
+  public getUsers(limit: number, page: number): Promise<UserEntity[]> {
     const skip = getSkipValueForPagination(limit, page);
     return this.userRepository.getUsers(limit, skip);
   }
 
-  public async createUser(user: CreateUserDto): Promise<User> {
+  public async createUser(user: CreateUserDto): Promise<UserEntity> {
     return this.userRepository.createUser(user);
   }
 
-  public async getUserByNickname(nickname: string): Promise<User | null> {
+  public async getUserByNickname(nickname: string): Promise<UserEntity | null> {
     return this.userRepository.getUserByNickname(nickname);
   }
 
-  public async getUserById(id: string): Promise<User> {
+  public async getUserById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.getUserById(id);
 
     if (!user) {
@@ -84,7 +84,7 @@ export class UserService {
     id: string,
     body: Partial<EditUserDto>,
     userRole: RoleType,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     const { firstName, lastName, password, role } = body;
 
     if (!firstName && !lastName && !password && !role) {
@@ -193,7 +193,8 @@ export class UserService {
       throw new InternalServerErrorException(`Avatar was not uploaded`);
     }
 
-    const publicUrl = this.configService.getOrThrow('OBJECT_PUBLIC_URL');
+    const publicUrl =
+      this.configService.getOrThrow<string>('OBJECT_PUBLIC_URL');
     const avatarUrl = publicUrl + key;
 
     await this.userRepository.saveAvatarUrl(userId, avatarUrl);

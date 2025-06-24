@@ -3,7 +3,7 @@ import { DataSource, Equal, Not, Repository } from 'typeorm';
 import { UpdateResult } from 'typeorm/query-builder/result/UpdateResult';
 
 import { CreateUserDto } from '@modules/auth/dto';
-import { Avatar, User, Vote } from './entities';
+import { Avatar, UserEntity, Vote } from './entities';
 import { IVoteSaveParams, IVoteUpdateParams, VoteType } from './types';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -11,13 +11,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 export class UserRepository {
   constructor(
     private readonly dataSource: DataSource,
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(Vote) private readonly voteRepository: Repository<Vote>,
     @InjectRepository(Avatar)
     private readonly avatarRepository: Repository<Avatar>,
   ) {}
 
-  public getUsers(limit: number, skip: number): Promise<User[]> {
+  public getUsers(limit: number, skip: number): Promise<UserEntity[]> {
     return this.userRepository.find({
       take: limit,
       skip,
@@ -37,7 +38,7 @@ export class UserRepository {
 
   public getUserByEmailVerificationToken(
     emailVerificationToken: string,
-  ): Promise<User | null> {
+  ): Promise<UserEntity | null> {
     return this.userRepository.findOneBy({ emailVerificationToken });
   }
 
@@ -48,18 +49,18 @@ export class UserRepository {
     );
   }
 
-  public createUser(user: CreateUserDto): Promise<User> {
-    return this.userRepository.save(user) as Promise<User>;
+  public createUser(user: CreateUserDto): Promise<UserEntity> {
+    return this.userRepository.save(user) as Promise<UserEntity>;
   }
 
-  public getUserByNickname(nickname: string): Promise<User | null> {
+  public getUserByNickname(nickname: string): Promise<UserEntity | null> {
     return this.userRepository.findOne({
       where: { nickname },
       relations: { avatar: true },
     });
   }
 
-  public getUserById(id: string): Promise<User | null> {
+  public getUserById(id: string): Promise<UserEntity | null> {
     return this.userRepository.findOne({
       where: { id },
       relations: { avatar: true },
@@ -147,9 +148,13 @@ export class UserRepository {
         }
 
         const rating = await this.countRating(userId, targetUserId, voteValue);
-        return await transactionalEntityManager.update(User, targetUserId, {
-          rating,
-        });
+        return await transactionalEntityManager.update(
+          UserEntity,
+          targetUserId,
+          {
+            rating,
+          },
+        );
       },
     );
   }

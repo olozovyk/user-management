@@ -3,9 +3,9 @@ import { UserService } from './user.service';
 import { UserRepository } from '../user.repository';
 import { S3Service } from './s3.service';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../entities';
+import { UserEntity } from '../entities';
 
-let mockedUser: Partial<User> = {
+let mockedUser: Partial<UserEntity> = {
   id: '1',
   nickname: 'john',
   firstName: 'John',
@@ -14,7 +14,7 @@ let mockedUser: Partial<User> = {
   role: 'user',
 };
 
-const editUserMocked = (id: string, user: Partial<User>) => {
+const editUserMocked = (id: string, user: Partial<UserEntity>) => {
   mockedUser = { ...mockedUser, ...user };
 };
 

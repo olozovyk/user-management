@@ -41,4 +41,4 @@ async function bootstrap() {
   await app.listen(configService.get('PORT') || 8080);
 }
 
-bootstrap();
+bootstrap(); // eslint-disable-line

@@ -6,16 +6,22 @@ import {
   HttpStatus,
   Injectable,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { UserService } from '@modules/user/services';
+import { ITokenPayload } from '@modules/auth/types';
 
 @Injectable()
 export class ProtectUserChangesByTimeGuard implements CanActivate {
   constructor(private userService: UserService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user: ITokenPayload }>();
 
-    if (!request.get('If-unmodified-since')) {
+    const ifUnmodifiedSinceHeader = request.get('If-unmodified-since');
+
+    if (!ifUnmodifiedSinceHeader) {
       throw new HttpException(
         'Header If-unmodified-since was not passed',
         HttpStatus.BAD_REQUEST,
@@ -27,7 +33,7 @@ export class ProtectUserChangesByTimeGuard implements CanActivate {
 
     const updatedAtTimestamp = user.updatedAt.setMilliseconds(0);
     const ifUnmodifiedSinceTimestamp = new Date(
-      request.get('If-unmodified-since'),
+      ifUnmodifiedSinceHeader,
     ).setMilliseconds(0);
 
     if (updatedAtTimestamp !== ifUnmodifiedSinceTimestamp) {

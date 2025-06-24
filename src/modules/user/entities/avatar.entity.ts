@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 
 @Entity({ name: 'avatars' })
 export class Avatar {
@@ -15,7 +15,7 @@ export class Avatar {
   @Column()
   avatarUrl: string;
 
-  @OneToOne(() => User, user => user.avatar)
+  @OneToOne(() => UserEntity, user => user.avatar)
   @JoinColumn()
-  user: User;
+  user: UserEntity;
 }

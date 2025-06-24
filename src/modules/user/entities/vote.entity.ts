@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
-import { User } from './user.entity';
+import { UserEntity } from './user.entity';
 import { VoteType, VoteValues } from '../types';
 
 @Entity({ name: 'votes' })
@@ -9,17 +9,17 @@ export class Vote {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User, user => user.votes, {
+  @ManyToOne(() => UserEntity, user => user.votes, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  user: User;
+  user: UserEntity;
 
-  @ManyToOne(() => User, user => user.receivedVotes, {
+  @ManyToOne(() => UserEntity, user => user.receivedVotes, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  targetUser: User;
+  targetUser: UserEntity;
 
   @Column({
     nullable: true,

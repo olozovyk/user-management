@@ -12,7 +12,7 @@ export function requestsLogger(
     return next();
   }
 
-  const ip = req.headers['x-forwarded-for'];
+  const ip = req.headers['x-forwarded-for'] as string;
 
   logger.log(`${req.method}, path:${req.url}, ${ip}`);
   logger.log(`body: ${JSON.stringify(req.body)}`);

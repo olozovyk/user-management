@@ -1,8 +1,12 @@
+import { ITokenPayload } from '@modules/auth/types';
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Request } from 'express';
 
 export const User = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
-    const request = ctx.switchToHttp().getRequest();
+    const request = ctx
+      .switchToHttp()
+      .getRequest<Request & { user: ITokenPayload }>();
     return request.user;
   },
 );
