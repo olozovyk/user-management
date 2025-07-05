@@ -78,10 +78,6 @@ export class UserRepository {
     await this.userRepository.softDelete(id);
   }
 
-  public async deleteUser(id: string): Promise<void> {
-    await this.userRepository.delete(id);
-  }
-
   public async getVote(
     userId: string,
     targetUserId: string,
@@ -188,5 +184,18 @@ export class UserRepository {
     newAvatar.avatarUrl = avatarUrl;
 
     await this.avatarRepository.upsert(newAvatar, ['user']);
+  }
+
+  // Method for e2e tests:
+  public getUserByEmail(email: string): Promise<UserEntity | null> {
+    return this.userRepository.findOne({
+      where: { email },
+      relations: { avatar: true },
+    });
+  }
+
+  // Method for e2e tests:
+  public async deleteUser(id: string): Promise<void> {
+    await this.userRepository.delete(id);
   }
 }

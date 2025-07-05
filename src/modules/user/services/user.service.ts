@@ -129,10 +129,6 @@ export class UserService {
     await this.userRepository.softDeleteUser(id);
   }
 
-  public async deleteUser(id: string) {
-    await this.userRepository.deleteUser(id);
-  }
-
   public async vote(
     userId: string,
     targetUserId: string,
@@ -199,5 +195,16 @@ export class UserService {
 
     await this.userRepository.saveAvatarUrl(userId, avatarUrl);
     return avatarUrl;
+  }
+
+  // Method for e2e tests:
+  public async getUserByEmail(email: string): Promise<UserEntity | null> {
+    const user = await this.userRepository.getUserByEmail(email);
+    return user ? user : null;
+  }
+
+  // Method for e2e tests:
+  public async deleteUser(id: string) {
+    await this.userRepository.deleteUser(id);
   }
 }

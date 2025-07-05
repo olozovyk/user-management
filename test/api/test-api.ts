@@ -1,8 +1,9 @@
 import * as request from 'supertest';
-
+import { App } from 'supertest/types';
 import { INestApplication } from '@nestjs/common';
 import { CreateUserDto, LoginDto } from '@modules/auth/dto';
-import { RoleType } from '@modules/user/types';
+import { IUser, RoleType } from '@modules/user/types';
+import { SupertestResponseWithBody } from 'test/types';
 
 interface IEditUserParams {
   userId: string;
@@ -20,7 +21,7 @@ interface IVoteParams {
 
 export class TestApi {
   private static instance: TestApi;
-  private _app: INestApplication;
+  private _app: INestApplication<App>;
 
   public static getInstance() {
     if (!TestApi.instance) {
@@ -29,11 +30,15 @@ export class TestApi {
     return TestApi.instance;
   }
 
-  public set app(app: INestApplication) {
+  public set app(app: INestApplication<App>) {
     this._app = app;
   }
 
-  public getUsers(): request.Test {
+  public async getUsers(): Promise<
+    SupertestResponseWithBody<{
+      users: unknown;
+    }>
+  > {
     return request(this._app.getHttpServer()).get('/public/users/');
   }
 
@@ -47,7 +52,9 @@ export class TestApi {
     return request(this._app.getHttpServer()).get(`/public/users/${nickname}`);
   }
 
-  public createUser(createUserDto: Partial<CreateUserDto>): request.Test {
+  public createUser(
+    createUserDto: Partial<CreateUserDto>,
+  ): Promise<SupertestResponseWithBody<{ user: IUser }>> {
     return request(this._app.getHttpServer())
       .post('/auth/signup/')
       .send(createUserDto);
