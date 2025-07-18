@@ -2,6 +2,11 @@ import { RoleType } from '@modules/user/types';
 
 export class PublicUserApiDto {
   /*
+   * @example 215325ea-f09a-40ea-9e73-d2f8b1dc675f
+   * */
+  id: string;
+
+  /*
    * @example john
    * */
   nickname: string;
@@ -28,11 +33,6 @@ export class PublicUserApiDto {
 }
 
 export class UserApiDto extends PublicUserApiDto {
-  /*
-   * @example 215325ea-f09a-40ea-9e73-d2f8b1dc675f
-   * */
-  id: string;
-
   /*
    * @example john@mail.com
    * */

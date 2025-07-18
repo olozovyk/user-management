@@ -20,6 +20,7 @@ function mapUserOutput(
   } = user;
 
   const userToReturn = {
+    id,
     nickname,
     firstName,
     lastName,
@@ -30,7 +31,6 @@ function mapUserOutput(
   if (isProtected) {
     return {
       ...userToReturn,
-      id,
       email,
       verifiedEmail,
       role,

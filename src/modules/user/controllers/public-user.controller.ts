@@ -16,7 +16,7 @@ import { QueryPaginationDto } from '../dto';
 import { IPublicUser } from '../types';
 
 @Controller('public/users')
-@ApiTags('User (public)')
+@ApiTags('User')
 export class PublicUser {
   constructor(private userService: UserService) {}
 
@@ -39,16 +39,16 @@ export class PublicUser {
   }
 
   /**
-   * Get user by nickname
+   * Get user by ID (public)
    */
-  @Get(':nickname')
+  @Get(':id')
   @ApiOkResponse({ type: GetPublicUserApiDto })
   @ApiNotFoundResponse({ description: 'Not found' })
-  public async getUserByNickname(
-    @Param('nickname') nickname: string,
+  public async getPublicUserById(
+    @Param('id') id: string,
     @Res() res: Response<{ user: IPublicUser }>,
   ) {
-    const user = await this.userService.getUserByNickname(nickname);
+    const user = await this.userService.getUserById(id);
 
     if (!user) {
       throw new NotFoundException('User not found');

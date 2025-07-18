@@ -60,32 +60,6 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   /**
-   * Get user ID by nickname
-   * */
-  @Get('user-by-nickname/:nickname')
-  @ApiOkResponse({ type: GetUserApiDto })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiNotFoundResponse({ description: 'Not found' })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
-  public async getUserIdByNickname(
-    @Param('nickname') nickname: string,
-    @Res() res: Response,
-  ) {
-    const user = await this.userService.getUserByNickname(nickname);
-
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    res.set('Last-Modified', user.updatedAt.toUTCString());
-
-    res.json({
-      user: mapUserOutput(user, true),
-    });
-  }
-
-  /**
    * Get user by ID
    */
   @Get(':id')
