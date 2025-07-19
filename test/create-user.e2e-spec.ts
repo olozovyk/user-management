@@ -1,42 +1,23 @@
-import * as request from 'supertest';
-import { Test } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { App } from 'supertest/types';
-import { AppModule } from '@modules/app.module';
 import { UserService } from '@modules/user/services';
 import { IUser } from '@modules/user/types';
+import { initTestingApp } from './utils';
+import { createUserRequest } from './supertest-api';
+import { createUserTestDto } from './create-user-test-dto';
 
-describe('create user - e2e', () => {
+describe('POST auth/signup - create user - e2e', () => {
   let app: INestApplication<App>;
   let userService: UserService;
 
-  const createUserDto = {
-    email: 'test_user@example.com',
-    nickname: 'Test',
-    firstName: 'Test',
-    lastName: 'Test',
-    password: 'test_password',
-  };
-
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+    const { app: _app, moduleRef } = await initTestingApp();
+    app = _app;
     userService = moduleRef.get<UserService>(UserService);
-    app = moduleRef.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
-    await app.init();
-  });
-
-  beforeEach(async () => {
-    const user = await userService.getUserByEmail(createUserDto.email);
-    if (user) {
-      await userService.deleteUser(user.id);
-    }
   });
 
   afterEach(async () => {
-    const user = await userService.getUserByEmail(createUserDto.email);
+    const user = await userService.getUserByEmail(createUserTestDto.email);
     if (user) {
       await userService.deleteUser(user.id);
     }
@@ -46,14 +27,35 @@ describe('create user - e2e', () => {
     await app.close();
   });
 
-  it('/auth/signup (POST) 201 - success (user created)', async () => {
-    const res = await request(app.getHttpServer())
-      .post('/auth/signup')
-      .send(createUserDto);
+  it('should create user not returning a password - success', async () => {
+    const res = await createUserRequest(app, createUserTestDto);
     expect(res.status).toBe(201);
+
     const { user } = res.body as { user: IUser };
-    expect(user.email).toBe(createUserDto.email);
+    expect(user.email).toBe(createUserTestDto.email);
+    expect(user).not.toHaveProperty('password');
   });
 
-  // TODO - add cases: not unique email, lack of fields, validation problems
+  it('should throw email in use - error', async () => {
+    await createUserRequest(app, createUserTestDto);
+    await createUserRequest(app, createUserTestDto).expect(400);
+  });
+
+  it('should throw a validation error - required field - error', async () => {
+    const createUserDtoWithoutFirstName = {
+      ...createUserTestDto,
+      firstName: undefined,
+    };
+    // @ts-expect-error - to have ability to pass firstName undefined value:
+    await createUserRequest(app, createUserDtoWithoutFirstName).expect(400);
+  });
+
+  it('should throw a validation error - wrong email format - error', async () => {
+    const createUserDtoWithWrongEmail = {
+      ...createUserTestDto,
+      email: 'email',
+    };
+
+    await createUserRequest(app, createUserDtoWithWrongEmail).expect(400);
+  });
 });

@@ -1,6 +1,7 @@
 import { RoleType } from './roles';
 
 export interface IPublicUser {
+  id: string;
   nickname: string;
   firstName: string;
   lastName: string;
@@ -9,7 +10,6 @@ export interface IPublicUser {
 }
 
 export interface IUser extends IPublicUser {
-  id: string;
   email: string;
   verifiedEmail: boolean;
   role: RoleType;

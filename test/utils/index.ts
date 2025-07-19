@@ -1,1 +1,1 @@
-export * from './delay';
+export * from './init-testing-app';
